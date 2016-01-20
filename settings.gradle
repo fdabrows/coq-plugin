@@ -1,2 +1,3 @@
 rootProject.name = 'coq-plugin'
+include 'coq-jps-plugin'
 

@@ -1,0 +1,47 @@
+<idea-plugin version="2">
+  <id>org.univorleans.coq</id>
+  <name>Plugin display name here</name>
+  <version>1.0</version>
+  <vendor email="frederic.dabrowski@univ-orleans.fr" url="http://www.univ-orleans.fr/">Université d'Orléans</vendor>
+
+  <description><![CDATA[
+      Enter short description for your plugin here.<br>
+      <em>most HTML tags may be used</em>
+    ]]></description>
+
+  <change-notes><![CDATA[
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="141.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <fileTypeFactory implementation = "org.univorleans.coq.files.CoqFileTypeFactory"/>
+    <moduleType id="COQ_MODULE" implementationClass="org.univorleans.coq.modules.CoqModuleType"/>
+    <internalFileTemplate name="Coq Module"/>
+    <compileServer.plugin classpath="org.univorleans.coq.CoqBuilderService"/>
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <action id="org.univorleans.coq.actions.NewCoqFileAction" class="org.univorleans.coq.actions.NewCoqFileAction"
+            icon="/icons/coq.png"
+            text="Coq Module" description="Create new Coq module">
+        <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+    </action>
+    <action class="org.univorleans.coq.testAction" id="org.univorleans.coq.testAction" text="Test" description="Test">
+      <add-to-group group-id="ToolsMenu" relative-to-action="GenerateJavadoc" anchor="after"/>
+    </action>
+    <!-- Add your actions here -->
+  </actions>
+
+</idea-plugin>
