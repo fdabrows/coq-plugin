@@ -25,10 +25,11 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <fileTypeFactory implementation = "org.univorleans.coq.files.CoqFileTypeFactory"/>
     <moduleType id="COQ_MODULE" implementationClass="org.univorleans.coq.modules.CoqModuleType"/>
+    <fileTypeFactory implementation = "org.univorleans.coq.files.CoqFileTypeFactory"/>
     <internalFileTemplate name="Coq Module"/>
-    <compileServer.plugin classpath="org.univorleans.coq.CoqBuilderService"/>
+    <sdkType id="Coq" implementation="org.univorleans.coq.sdk.CoqSdkType"/>
+    <compileServer.plugin classpath="coq-jps-plugin.jar"/>
     <!-- Add your extensions here -->
   </extensions>
 
@@ -38,9 +39,10 @@
             text="Coq Module" description="Create new Coq module">
         <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
     </action>
-    <action class="org.univorleans.coq.testAction" id="org.univorleans.coq.testAction" text="Test" description="Test">
+    <action id="org.univorleans.coq.actions.TestAction" class="org.univorleans.coq.actions.TestAction">
       <add-to-group group-id="ToolsMenu" relative-to-action="GenerateJavadoc" anchor="after"/>
     </action>
+
     <!-- Add your actions here -->
   </actions>
 

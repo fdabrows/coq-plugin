@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.jetbrains:markdownj-core-0.4.2-SNAPSHOT:LATEST-EAP-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/dfa0225c46309b0df260ca7fc6a6d577a4641fa2/ideaIC-LATEST-EAP-SNAPSHOT/lib/markdownj-core-0.4.2-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/3f6141206b1d24f2f7e66db372a0abbcd9ba0239/ideaIC-LATEST-EAP-SNAPSHOT/lib/markdownj-core-0.4.2-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/357ed0c76120ec0c8b039e0121d1c8dad132ff1a/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/d4b34ccdbfb2433e9281752fa884be72e7133969/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
