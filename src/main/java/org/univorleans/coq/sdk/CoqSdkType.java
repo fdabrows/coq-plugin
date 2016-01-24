@@ -18,42 +18,44 @@ public class CoqSdkType extends SdkType{
     public static final CoqSdkType INSTANCE = new CoqSdkType();
 
     public CoqSdkType() {
+
         super(JpsCoqModelSerializerExtension.COQ_SDK_TYPE_ID);
     }
 
     @NotNull
     public static CoqSdkType getInstance() {
+
         CoqSdkType instance = SdkType.findInstance(CoqSdkType.class);
-        assert instance != null : "Make sure CoqSdkType is registered in plugin.xml";
+        assert instance != null : "Make sure JpsCoqSdkType is registered in plugin.xml";
         return instance;
     }
 
     @Nullable
     @Override
     public String suggestHomePath() {
+        String path = null;
         if (SystemInfo.isWindows) {
-            return "C:\\Program Files (x86)\\coq\\bin";
+            path =  "C:\\Program Files (x86)\\coq\\bin";
         }
         else if (SystemInfo.isMac) {
-            String macPorts = "/usr/local";
-            return macPorts;
+            path = "/usr/local";
         }
         else if (SystemInfo.isLinux) {
-            return "/usr/lib";
+            path = "/usr/lib";
         }
-        return null;
-    }
-
-    @Override
-    public boolean isValidSdkHome(String path) {
-        File erl = JpsCoqSdkType.getByteCodeInterpreterExecutable(path);
-        File erlc = JpsCoqSdkType.getByteCodeCompilerExecutable(path);
-        return erl.canExecute() && erlc.canExecute();
+        return path;
     }
 
     @Override
     public String suggestSdkName(String s, String s1) {
         return "Coq SDK";
+    }
+
+    @Override
+    public boolean isValidSdkHome(String path) {
+        File coqtop = JpsCoqSdkType.getByteCodeInterpreterExecutable(path);
+        File coqc = JpsCoqSdkType.getByteCodeCompilerExecutable(path);
+        return coqtop.canExecute() && coqtop.canExecute();
     }
 
     @Nullable
@@ -63,18 +65,27 @@ public class CoqSdkType extends SdkType{
     }
 
     @Override
+    public void saveAdditionalData(@NotNull SdkAdditionalData sdkAdditionalData, @NotNull Element element) {
+
+    }
+
+
+    @Override
     public String getPresentableName() {
+
         return "Coq SDK";
     }
 
-    @Override
-    public void saveAdditionalData(@NotNull SdkAdditionalData sdkAdditionalData, @NotNull Element element) {
+    public File getBinDirectory(String path) {
+        return new File(path, "bin");
 
     }
 
     @Nullable
     @Override
     public String getVersionString(@NotNull String sdkHome) {
+
+        String cmd = getBinDirectory(sdkHome).getAbsolutePath() + File.separator + JpsCoqSdkType.BYTECODE_COMPILER;
         return "Unknown";
     }
 

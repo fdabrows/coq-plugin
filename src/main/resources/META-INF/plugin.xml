@@ -2,7 +2,7 @@
   <id>org.univorleans.coq</id>
   <name>Plugin display name here</name>
   <version>1.0</version>
-  <vendor email="frederic.dabrowski@univ-orleans.fr" url="http://www.univ-orleans.fr/">Université d'Orléans</vendor>
+  <vendor email="frederic.dabrowski@univ-orleans.fr" url="http://www.univ-orleans.fr/">Université d'Orleans</vendor>
 
   <description><![CDATA[
       Enter short description for your plugin here.<br>
@@ -42,8 +42,14 @@
     <action id="org.univorleans.coq.actions.TestAction" class="org.univorleans.coq.actions.TestAction">
       <add-to-group group-id="ToolsMenu" relative-to-action="GenerateJavadoc" anchor="after"/>
     </action>
-
     <!-- Add your actions here -->
   </actions>
+
+  <project-components>
+    <component>
+      <implementation-class>org.univorleans.coq.compilation.CoqdepManager</implementation-class>
+    </component>
+  </project-components>
+
 
 </idea-plugin>

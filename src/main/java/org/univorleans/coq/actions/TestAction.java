@@ -49,3 +49,6 @@ public class TestAction extends AnAction {
 // - META-INF
 // -- services
 // -- org
+
+// CoqdepCompileTask
+// CoqModuleBuildOrderBuilder

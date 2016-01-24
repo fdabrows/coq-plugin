@@ -2,6 +2,7 @@ package org.univorleans.coq.modules;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.module.ModuleTypeManager;
 import com.intellij.openapi.projectRoots.Sdk;
 import org.jetbrains.annotations.NotNull;
 import org.univorleans.coq.CoqIcons;
@@ -13,10 +14,16 @@ import javax.swing.*;
  */
 public class CoqModuleType extends ModuleType<CoqModuleBuilder> {
 
-    public static final CoqModuleType INSTANCE = new CoqModuleType();
+    public static final String MODULE_TYPE_ID = "COQ_MODULE";
+
+    //public static final CoqModuleType INSTANCE = new CoqModuleType();
 
     public CoqModuleType(){
-        super("COQ_MODULE");
+        super(MODULE_TYPE_ID);
+    }
+
+    public static CoqModuleType getInstance() {
+        return (CoqModuleType) ModuleTypeManager.getInstance().findByID(MODULE_TYPE_ID);
     }
 
     @NotNull
@@ -52,7 +59,7 @@ public class CoqModuleType extends ModuleType<CoqModuleBuilder> {
     @Override
     public boolean isValidSdk(Module module, Sdk projectSdk) {
         return true;
-        //return projectSdk.getSdkType() == CoqSdkType.INSTANCE;
+        //return projectSdk.getSdkType() == JpsCoqSdkType.INSTANCE;
     }
 
 }
