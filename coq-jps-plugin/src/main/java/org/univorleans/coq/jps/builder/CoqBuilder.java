@@ -1,5 +1,7 @@
 package org.univorleans.coq.jps.builder;
 
+import com.intellij.ide.ui.AppearanceOptionsTopHitProvider;
+import com.intellij.openapi.projectRoots.Sdk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jps.ModuleChunk;
 import org.jetbrains.jps.builders.DirtyFilesHolder;
@@ -13,7 +15,10 @@ import org.jetbrains.jps.model.library.sdk.JpsSdk;
 import org.jetbrains.jps.model.module.*;
 import org.univorleans.coq.jps.model.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,16 +49,42 @@ public class CoqBuilder extends ModuleLevelBuilder{
                         "coq", BuildMessage.Kind.ERROR, "Can't find Coq SDK"));
                 continue;
             }
+            if (!doBuild(compileContext, module, sdk)) return ExitCode.ABORT;
         }
-
-        LOG.info("CoqBuilder.build");
         return ExitCode.OK;
     }
 
-    private boolean doBuild(CompileContext compileContext){
+    public static File[] getSubdirs(File file) {
+
+        List<File> dirs = new ArrayList<>();
+        if (file.isDirectory()){
+            File[] files = file.listFiles();
+            for (File f : files) {
+                dirs.addAll(Arrays.asList(getSubdirs(f)));
+
+/*                if (f.isDirectory()) {
+                    dirs.add(f);
+                    dirs.addAll(Arrays.asList(getSubdirs(f)));
+                }*/
+
+            }
+        }
+        return dirs.toArray(new File[0]);
+    }
+
+    private boolean doBuild(CompileContext compileContext, JpsModule module, JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> sdk){
         compileContext.processMessage(new ProgressMessage("Coq build"));
         compileContext.processMessage(new CompilerMessage("Coq", BuildMessage.Kind.INFO, "Start build"));
-
+        CoqProjectDependencies dependencies =
+                CoqBuilderUtil.readFromXML(compileContext,
+                        CoqBuilderUtil.BUILD_ORDER_FILE_NAME,
+                        CoqProjectDependencies.class);
+        File dir = module.getSourceRoots().get(0).getFile();
+        File[] includes = getSubdirs(module.getSourceRoots().get(0).getFile());
+        CoqcWrapper coqc = new CoqcWrapper(compileContext, sdk, includes, dir);
+        for (String str : dependencies.getOrderedFiles(dependencies.getAllFiles())){
+            coqc.compile(new File(str));
+        }
         return true;
     }
 
@@ -73,6 +104,7 @@ public class CoqBuilder extends ModuleLevelBuilder{
 
     @Override
     public List<String> getCompilableFileExtensions() {
+
         return Collections.singletonList("v");
     }
 

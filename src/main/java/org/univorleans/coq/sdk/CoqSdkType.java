@@ -30,6 +30,8 @@ public class CoqSdkType extends SdkType{
         return instance;
     }
 
+
+
     @Nullable
     @Override
     public String suggestHomePath() {

@@ -8,21 +8,21 @@ import com.intellij.openapi.startup.StartupManager;
 /**
  * Created by dabrowski on 22/01/2016.
  */
-public class CoqdepManager extends AbstractProjectComponent {
+public class CoqdependenciesManager extends AbstractProjectComponent {
 
-    protected CoqdepManager(Project project) {
+    protected CoqdependenciesManager(Project project) {
 
         super(project);
     }
 
-    /* Adds a compiler task to be executed before the compilation */
-    /* StartupManager : to add a task which is run during project loading */
+    /** At project loading, adds a compiler task to be executed before the compilation.
+     * This task computes dependencies and stores them in XML format */
     @Override
     public void initComponent() {
 
         CompilerManager compilerManager = CompilerManager.getInstance(myProject);
         StartupManager startupManager = StartupManager.getInstance(myProject);
-        CoqdepCompileTask task = new CoqdepCompileTask();
+        CoqdependenciesCompileTask task = new CoqdependenciesCompileTask();
         startupManager.registerPostStartupActivity(() -> compilerManager.addBeforeTask(task));
     }
 

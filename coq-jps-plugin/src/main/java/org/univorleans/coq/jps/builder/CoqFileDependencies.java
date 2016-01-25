@@ -14,7 +14,7 @@ import java.util.List;
 public class CoqFileDependencies {
 
     @Attribute("path")
-    private String myPath;
+    public String myPath;
 
     @Tag("dependencies")
     @AbstractCollection(surroundWithTag = false, elementTag = "dependency")

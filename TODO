@@ -1,2 +1,1 @@
-Reprendre la génération de la liste des dépendances, son écriture, sa lecture
-et ajouter les tests.
+Gerer l'erreur de syntaxe dans le calcul de dépendance.

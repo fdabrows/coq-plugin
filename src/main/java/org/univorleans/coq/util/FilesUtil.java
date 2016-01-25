@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class FilesUtil {
 
-    public static VirtualFile[] getSubdirs(VirtualFile file) {
+    public static List<VirtualFile> getSubdirs(VirtualFile file) {
 
         VirtualFile[] files = file.getChildren();
         List<VirtualFile> dirs = new ArrayList<>();
@@ -19,9 +19,9 @@ public class FilesUtil {
         for (VirtualFile f : files) {
             if (f.isDirectory()) {
                 dirs.add(f);
-                dirs.addAll(Arrays.asList(getSubdirs(f)));
+                dirs.addAll(getSubdirs(f));
             }
         }
-        return dirs.toArray(new VirtualFile[0]);
+        return dirs;
     }
 }

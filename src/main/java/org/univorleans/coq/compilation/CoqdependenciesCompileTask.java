@@ -5,6 +5,7 @@ import com.intellij.openapi.compiler.CompileContext;
 import com.intellij.openapi.compiler.CompileTask;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.ProjectRootManager;
@@ -22,77 +23,66 @@ import org.univorleans.coq.files.CoqLanguageFileType;
 import org.univorleans.coq.jps.builder.CoqBuilderUtil;
 import org.univorleans.coq.jps.builder.CoqFileDependencies;
 import org.univorleans.coq.jps.builder.CoqProjectDependencies;
-import org.univorleans.coq.util.FilesUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by dabrowski on 22/01/2016.
  */
-public class CoqdepCompileTask implements CompileTask {
+public class CoqdependenciesCompileTask implements CompileTask {
 
-    private static final Logger LOG = Logger.getInstance(CoqdepCompileTask.class);
+    private static final Logger LOG = Logger.getInstance(CoqdependenciesCompileTask.class);
 
-
+    /**
+     * Computes project dependencies and store them as XML file
+     * @param compileContext the compilation context
+     * @return true if succeed
+     */
     @Override
     public boolean execute(@NotNull CompileContext compileContext) {
 
-        List<CoqFileDependencies> dependencies = getDependencies(compileContext);
-
-        if (dependencies == null) {
-            addPrepareDependenciesFailedMessage(compileContext);
-            return false;
-        }
-        CoqProjectDependencies coqProjectDependencies =
-                new CoqProjectDependencies(getDependencies(compileContext));
-        return writeDependencies(compileContext, coqProjectDependencies);
+        CoqProjectDependencies dependencies = computeDependencies(compileContext);
+        if (dependencies == null) return false;
+        return writeDependencies(compileContext, dependencies);
     }
 
-    @NotNull
-    private CoqFileDependencies extractDependency(@NotNull String path, @NotNull List<String> coqdepOutput){
-        List<String> dep = new ArrayList<>();
-        for (String str2 : coqdepOutput) {
-            String[] parts = str2.split(":");
-            String[] left = parts[0].split(" ");
-            String[] right = parts[1].split(" ");
-            Pattern pattern = Pattern.compile("[^.]*.vo");
-            for (String a : left) {
-                if (path.equals(a.substring(0, a.length() - 1))) {
-                    for (String b : right) {
-                        Matcher matcher2 = pattern.matcher(b);
-                        if (matcher2.matches()){
-                            dep.add(b.substring(0, b.length() - 1));
-                        }
-                    }
-                }
-            }
-        }
-        return new CoqFileDependencies(path, dep);
-    }
-
+    /**
+     * Compute project dependencies
+     * @param compileContext the compilation context
+     * @return a CoqProjectDependencies object if succeeds, null otherwise
+     */
     @Nullable
-    private List<CoqFileDependencies> getDependencies(@NotNull CompileContext compileContext) {
+    private CoqProjectDependencies computeDependencies(@NotNull CompileContext compileContext) {
 
-        VirtualFile[] files = compileContext.getCompileScope().getFiles(CoqLanguageFileType.INSTANCE, true);
+        compileContext.addMessage(CompilerMessageCategory.INFORMATION,
+                "Computing dependencies",
+                null, -1, -1);
+
         Project project = compileContext.getProject();
-        VirtualFile base = project.getBaseDir().findChild("src");
-        VirtualFile[] subdirs = FilesUtil.getSubdirs(base);
-        Sdk projectSdk = ProjectRootManager.getInstance(compileContext.getProject()).getProjectSdk();
-        CoqdepWrapper coqdepWrapper = new CoqdepWrapper(compileContext, projectSdk, subdirs, files, base);
-        List <String> result = coqdepWrapper.execute();
-        if (result == null) {
-            addPrepareDependenciesFailedMessage(compileContext);
-            return null;
+        Module[] modules = compileContext.getCompileScope().getAffectedModules();
+        VirtualFile[] virtualFiles = compileContext.getCompileScope().getFiles(CoqLanguageFileType.INSTANCE, true);
+
+        List<VirtualFile> sourceRoots = new ArrayList<>();
+        for (Module module : modules){
+            sourceRoots.addAll(Arrays.asList(compileContext.getSourceRoots(module)));
         }
-        List <CoqFileDependencies> coqFileDependencies = new ArrayList<>();
-        for (VirtualFile vf : files)
-            coqFileDependencies.add(extractDependency(vf.getPath(), result));
-        return coqFileDependencies;
+
+        //VirtualFile base = project.getBaseDir().findChild("src");
+
+        //VirtualFile[] subdirs = FilesUtil.getSubdirs(base);
+
+        Sdk projectSdk = ProjectRootManager.getInstance(compileContext.getProject()).getProjectSdk();
+
+        CoqdepWrapper coqdepWrapper = new CoqdepWrapper(compileContext, projectSdk, virtualFiles, sourceRoots);
+
+        List <CoqFileDependencies> result = coqdepWrapper.execute();
+
+        if (result == null) return null;
+        return new CoqProjectDependencies(result);
     }
 
     private boolean writeDependencies(@NotNull CompileContext compileContext,
