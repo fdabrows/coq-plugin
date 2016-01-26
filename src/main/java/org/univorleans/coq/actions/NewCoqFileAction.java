@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidatorEx;
 import com.intellij.psi.PsiDirectory;
 import org.jetbrains.annotations.Nullable;
-import org.univorleans.coq.CoqIcons;
+import org.univorleans.coq.util.CoqIcons;
 
 /**
  * Created by dabrowski on 20/01/2016.

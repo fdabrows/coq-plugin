@@ -6,8 +6,7 @@ import com.intellij.util.xmlb.annotations.AbstractCollection;
 import com.intellij.util.xmlb.annotations.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by dabrowski on 22/01/2016.
@@ -15,37 +14,39 @@ import java.util.List;
 public class CoqProjectDependencies {
     @Tag("files")
     @AbstractCollection(surroundWithTag = false, elementTag = "file")
-    public List<CoqFileDependencies> myFiles = ContainerUtil.newArrayList();
+    public Map<String, List<String>> dependencies;
 
     @SuppressWarnings("unused") // reflection
     public CoqProjectDependencies() {
     }
 
-    public CoqProjectDependencies(@NotNull List<CoqFileDependencies> files) {
-        myFiles = files;
+    public CoqProjectDependencies(@NotNull Map<String, List<String>> dependencies) {
+        this.dependencies = dependencies;
     }
 
     private List<Pair<String,String>> getEdges(){
         List <Pair<String,String>> pairs = new ArrayList<>();
-        for (CoqFileDependencies dep : myFiles){
-            for (String file :  dep.myDependencies){
-                pairs.add(new Pair<>(file, dep.myPath));
+        Set<String> keys = dependencies.keySet();
+        Iterator<String> iterator = keys.iterator();
+        while (iterator.hasNext()){
+            String key = iterator.next();
+            List<String> predecessors = dependencies.get(key);
+            Iterator<String> iterator2 = predecessors.iterator();
+            while (iterator2.hasNext()){
+                pairs.add(new Pair<String,String>(iterator2.next(), key));
             }
         }
         return pairs;
     }
 
-    public List<String> getAllFiles(){
-        List <String> list = new ArrayList<>();
-        for (CoqFileDependencies dep : myFiles){
-            list.add(dep.myPath);
-        }
-        return list;
+    public Set<String> getAllFiles(){
+        return dependencies.keySet();
     }
 
     @NotNull
-    public List<String> getOrderedFiles(@NotNull List<String> files){
-        files.sort((f1,f2) -> {
+    public List<String> getOrderedFiles(@NotNull Collection<String> files){
+        List <String> myFiles = Arrays.asList(files.toArray(new String[0]));
+        myFiles.sort((f1,f2) -> {
                     if (f1.equals(f2)) return 0;
                     for (Pair<String, String> p1 : getEdges()) {
                         if (p1.getFirst().equals(f1) &&
@@ -53,6 +54,6 @@ public class CoqProjectDependencies {
                     }
                     return -1;
                 });
-        return files;
+        return myFiles;
     }
 }

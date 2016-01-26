@@ -1,11 +1,15 @@
 package org.univorleans.coq.compilation;
 
 import com.intellij.openapi.compiler.CompileContext;
+import com.intellij.openapi.compiler.CompileScope;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
-import org.univorleans.coq.jps.builder.CoqFileDependencies;
+import org.univorleans.coq.files.CoqFileType;
+import org.univorleans.coq.jps.builder.CoqProjectDependencies;
 import org.univorleans.coq.jps.model.JpsCoqSdkType;
 import org.univorleans.coq.util.FilesUtil;
 
@@ -14,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,15 +28,26 @@ public class CoqdepWrapper {
 
     String[] cmd;
     CompileContext context;
-    VirtualFile[] virtualFiles;
 
-    public CoqdepWrapper(CompileContext context, Sdk projectSdk, VirtualFile[] virtualFiles, List<VirtualFile> dirs) {
+    public CoqdepWrapper(CompileContext context) {
+
+        Sdk projectSdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
+
+        CompileScope compileScope = context.getCompileScope();
+
+        Module[] modules = compileScope.getAffectedModules();
+        VirtualFile[] virtualFiles = compileScope.getFiles(CoqFileType.INSTANCE, true);
+
+        List<VirtualFile> sourceRoots = new ArrayList<>();
+        for (Module module : modules)
+            sourceRoots.addAll(Arrays.asList(context.getSourceRoots(module)));
+
 
         List<String> cmd = new ArrayList<>();
         File coqc = JpsCoqSdkType.getByteCodeCompilerExecutable(projectSdk.getHomePath());
 
         cmd.add(coqc.getPath());
-        for (VirtualFile virtualFile : dirs) {
+        for (VirtualFile virtualFile : sourceRoots) {
             for (VirtualFile subdir : FilesUtil.getSubdirs(virtualFile)) {
                 cmd.add("-I");
                 cmd.add(subdir.getPath());
@@ -39,13 +55,13 @@ public class CoqdepWrapper {
         }
         for (VirtualFile file : virtualFiles) cmd.add(file.getPath());
 
+
         this.cmd = cmd.toArray(new String[0]);
         this.context = context;
-        this.virtualFiles = virtualFiles;
     }
 
     @Nullable
-    public List<CoqFileDependencies> execute() {
+    public CoqProjectDependencies execute() {
         Runtime runtime = Runtime.getRuntime();
         BufferedReader processOutput;
         BufferedReader processError;
@@ -71,12 +87,10 @@ public class CoqdepWrapper {
             while ((str = processOutput.readLine()) != null)
                 lines.add(str);
 
-            List <CoqFileDependencies> coqFileDependencies = new ArrayList<>();
 
             // TODO : not use virtualFiles, prefer take information into lines
-            for (VirtualFile vf : virtualFiles)
-                coqFileDependencies.add(CoqdependenciesUtil.extractDependency(vf.getPath(), lines));
-            return coqFileDependencies;
+            CoqProjectDependencies dependencies = CoqdependenciesUtil.extractDependencies(lines);
+            return dependencies;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

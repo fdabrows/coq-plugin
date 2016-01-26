@@ -8,8 +8,9 @@ import org.jetbrains.annotations.NotNull;
  * Created by dabrowski on 20/01/2016.
  */
 public class CoqFileTypeFactory extends FileTypeFactory {
+
     @Override
     public void createFileTypes(@NotNull FileTypeConsumer fileTypeConsumer) {
-        fileTypeConsumer.consume(CoqLanguageFileType.INSTANCE, "instance");
+        fileTypeConsumer.consume(CoqFileType.INSTANCE, CoqFileType.DEFAULT_EXTENSION);
     }
 }

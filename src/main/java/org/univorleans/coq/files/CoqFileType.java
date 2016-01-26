@@ -4,37 +4,38 @@ import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.univorleans.coq.CoqIcons;
+import org.univorleans.coq.util.CoqIcons;
 
 import javax.swing.*;
 
 /**
  * Created by dabrowski on 20/01/2016.
  */
-public class CoqLanguageFileType extends LanguageFileType{
+public class CoqFileType extends LanguageFileType{
 
-    public static CoqLanguageFileType INSTANCE = new CoqLanguageFileType();
+    public final static CoqFileType INSTANCE = new CoqFileType();
 
-    private CoqLanguageFileType(){
+    public final static String NAME = "COQSOURCE";
+    public final static String DEFAULT_EXTENSION = "v";
+
+    private CoqFileType(){
         super(CoqLanguage.INSTANCE);
     }
 
     @NotNull
     @Override
     public String getName() {
-        return "Coq File";
+        return NAME;
     }
 
     @NotNull
     @Override
-    public String getDescription() {
-        return "Coq";
-    }
+    public String getDescription() { return "Coq source file"; }
 
     @NotNull
     @Override
     public String getDefaultExtension() {
-        return "v";
+        return DEFAULT_EXTENSION;
     }
 
     @Nullable
@@ -45,6 +46,6 @@ public class CoqLanguageFileType extends LanguageFileType{
 
     @Override
     public String getCharset(@NotNull VirtualFile file, byte[] content) {
-        return "UTF8";
+        return "UTF-8";
     }
 }

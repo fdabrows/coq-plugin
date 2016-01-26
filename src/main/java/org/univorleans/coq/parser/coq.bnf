@@ -1,0 +1,79 @@
+{
+    parserClass = "org.univorleans.coq.parser.CoqParser"
+
+    extends = "com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Coq"
+    psiImplClassSuffix="Impl"
+    psiPackage="org.univorleans.coq.psi"
+    psiImplPackage="org.univorleans.coq.psi.impl"
+
+    elementTypeHolderClass="org.univorleans.coq.psi.CoqTypes"
+    elementTypeClass="org.univorleans.coq.psi.CoqElementType"
+    tokenTypeClass="org.univorleans.coq.psi.CoqTokenType"
+
+    psiImplUtilClass="org.univorleans.coq.psi.impl.CoqPsiImplUtil"
+}
+
+coqFile ::= (documentation | commentary | def_general | LBRACK | RBRACK | COMMENT )*
+
+documentation ::= DOCOPEN (any | DOT)* (commentary (any | DOT)*)? COMCLOSE
+
+commentary ::= COMOPEN (any | DOT)* (commentary (any | DOT)*)? COMCLOSE
+
+anytowith ::=
+| ID | NUMBER
+| KEYWORD | COMMAND | TACTIC
+| MID | COMMA | BIGARROW | ARROW
+| COLON | SEMICOLON
+| LPAR | RPAR | LBRACK | RBRACK
+| LSQBRACK | RSQBRACK
+| ASSIGN
+| FDOT | ANYBUTDOT
+
+withany ::= anytowith* MATCH withany WITH withany END | anytowith*
+
+any ::=
+| ID | NUMBER
+| DEFINITION_KW | PROOF_KW | QED | DEFINED | ADMITTED | FIXPOINT_KW | INDUCTIVE_KW | COFIXPOINT_KW | assertion_keyword
+| KEYWORD | COMMAND | TACTIC
+| MID | COMMA | BIGARROW | ARROW
+| COLON | SEMICOLON
+| LPAR | RPAR | LBRACK | RBRACK
+| LSQBRACK | RSQBRACK
+| ASSIGN
+| MATCH | WITH | END
+| FDOT | ANYBUTDOT
+
+def_general ::=
+    | definition
+    | fixpoint
+    | cofixpoint
+    | inductive
+    | assertion
+    | PROOF_KW DOT
+    | (QED | DEFINED | ADMITTED) DOT
+    | any+ DOT
+
+definition ::= DEFINITION_KW ID any+ DOT
+
+fixpoint ::= FIXPOINT_KW (fix_body (WITH fix_body)* DOT | any+ DOT)
+
+fix_body ::= ID withany
+
+inductive ::= INDUCTIVE_KW (ind_body (WITH ind_body)* DOT | any+ DOT)
+
+ind_body ::= ID withany
+
+cofixpoint ::= COFIXPOINT_KW any+ DOT
+
+assertion ::= assertion_keyword ID any+ DOT
+
+assertion_keyword ::=
+    | THEOREM_KW | LEMMA_KW
+    | REMARK_KW | FACT_KW
+    | COROLLARY_KW | PROPOSITION_KW
+    | EXAMPLE_KW
+
+
+

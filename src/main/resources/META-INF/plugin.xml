@@ -26,11 +26,20 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <moduleType id="COQ_MODULE" implementationClass="org.univorleans.coq.modules.CoqModuleType"/>
-    <fileTypeFactory implementation = "org.univorleans.coq.virtualFiles.CoqFileTypeFactory"/>
+    <fileTypeFactory implementation = "org.univorleans.coq.files.CoqFileTypeFactory"/>
     <internalFileTemplate name="Coq Module"/>
+    <lang.parserDefinition language="Coq" implementationClass="org.univorleans.coq.parser.CoqParserDefinition"/>
+    <lang.syntaxHighlighterFactory language="Coq" implementationClass="org.univorleans.coq.highlighter.CoqSyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="org.univorleans.coq.config.CoqColorSettingsPage"/>
     <sdkType id="Coq" implementation="org.univorleans.coq.sdk.CoqSdkType"/>
     <compileServer.plugin classpath="coq-jps-plugin.jar"/>
+    <!-- <lang.psiStructureViewFactory language="Coq" implementationClass="org.univorleans.coq.structure.CoqStructureViewFactory"/> -->
+    <!-- <treeStructureProvider implementation="org.univorleans.coq.structure.CoqTreeStructureProvider"/> -->
     <!-- Add your extensions here -->
+    <toolWindow id="Coqtop Messages"  anchor="bottom"
+                factoryClass="org.univorleans.coq.toolWindows.CoqtopMessageView"/>
+    <toolWindow id="Coq Proof tree" anchor="right"
+                factoryClass="org.univorleans.coq.toolWindows.CoqtopProofView"/>
   </extensions>
 
   <actions>
@@ -43,7 +52,39 @@
       <add-to-group group-id="ToolsMenu" relative-to-action="GenerateJavadoc" anchor="after"/>
     </action>
     <!-- Add your actions here -->
+    <group id="CoqMenu" text="Coq" description="Coq actions"  popup="false" >
+      <separator/>
+
+      <action id="org.intellij.coq.actions.NextAction" class="org.univorleans.coq.actions.NextAction" text="Next"
+              description="Next Line">
+      </action>
+      <action id="org.intellij.coq.actions.BackAction" class="org.univorleans.coq.actions.BackAction" text="Undo"
+              description="Last Line">
+      </action>
+      <action id="org.intellij.coq.actions.UseAction" class="org.univorleans.coq.actions.UseAction" text="Use"
+              description="End of file">
+      </action>
+      <action id="org.intellij.coq.actions.RetractAction" class="org.univorleans.coq.actions.RetractAction" text="Retract"
+              description="Last Line">
+      </action>
+      <action id="org.intellij.coq.actions.GotoAction" class="org.univorleans.coq.actions.GotoAction" text="Go to cursor"
+              description="Last Line">
+      </action>
+      <separator/>
+      <!-- <add-to-group group-id="MainMenu" relative-to-action="ToolsMenu" anchor="before"/>-->
+      <add-to-group group-id="RunMenu" relative-to-action="Runner.Layout" anchor="before"/>
+      <action id="org.intellij.coq.actions.StopAction" class="org.univorleans.coq.actions.StopAction" text="Stop coqtop"
+              description="Last Line">
+      </action>
+    </group>
+
   </actions>
+
+  <application-components>
+    <component>
+      <implementation-class>org.univorleans.coq.idea.AppComponent</implementation-class>
+    </component>
+  </application-components>
 
   <project-components>
     <component>

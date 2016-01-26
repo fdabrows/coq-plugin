@@ -5,7 +5,7 @@ import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.module.ModuleTypeManager;
 import com.intellij.openapi.projectRoots.Sdk;
 import org.jetbrains.annotations.NotNull;
-import org.univorleans.coq.CoqIcons;
+import org.univorleans.coq.util.CoqIcons;
 
 import javax.swing.*;
 

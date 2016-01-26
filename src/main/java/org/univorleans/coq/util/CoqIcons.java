@@ -1,4 +1,4 @@
-package org.univorleans.coq;
+package org.univorleans.coq.util;
 
 import com.intellij.openapi.util.IconLoader;
 
