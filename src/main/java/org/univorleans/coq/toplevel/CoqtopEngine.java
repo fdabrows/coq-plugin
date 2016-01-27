@@ -1,6 +1,6 @@
 /*
  * IntelliJ-coqplugin  / Plugin IntelliJ for Coq
- * Copyright (c) 2016
+ * Copyright (c) 2016 F. Dabrowski
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,10 +17,20 @@
 
 package org.univorleans.coq.toplevel;
 
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.univorleans.coq.errors.CoqtopPathError;
-import org.univorleans.coq.errors.InvalidPrompt;
-import org.univorleans.coq.errors.InvalidState;
+import org.univorleans.coq.errors.InvalidCoqtopResponse;
 import org.univorleans.coq.errors.NoCoqProcess;
+import org.univorleans.coq.jps.model.JpsCoqSdkType;
 import org.univorleans.coq.listeners.MessageTextListener;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -32,9 +42,11 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.util.ui.UIUtil;
 import org.univorleans.coq.toolWindows.CoqtopMessageView;
 import org.univorleans.coq.listeners.ProofTextListener;
+import org.univorleans.coq.util.FilesUtil;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,29 +63,49 @@ public class CoqtopEngine implements CoqStateListener {
     private static CoqtopEngine running = null;
 
 
-    // returns the CoqtopEngine associated with an editor.
+    private static void showNoEditorSelectedDialog (){
+        JOptionPane.showConfirmDialog(null, "No editor selected", "No editor selected", JOptionPane.OK_OPTION);
+
+    }
+
+    private static int showEditorChange(){
+        return JOptionPane.showConfirmDialog(null, "Editor change", "Editor change", JOptionPane.OK_CANCEL_OPTION);
+
+    }
+
+    //returns the CoqtopEngine associated with an editor.
     //@returns may return null
     //@assumes editor != null
-    public static CoqtopEngine getEngine(Editor editor) throws IOException, InvalidPrompt, InvalidState {
+    @Nullable
+    public static CoqtopEngine getEngine(@Nullable  Editor editor) {
 
-        CoqtopEngine coqtopEngine = editor.getDocument().getUserData(editorKey);
-        if (coqtopEngine != null && coqtopEngine == running) return running;
-        if (running != null) {
-            int retour = JOptionPane.showConfirmDialog(null, "Editor change", "Editor change", JOptionPane.OK_CANCEL_OPTION);
-            if (retour == JOptionPane.CANCEL_OPTION) return null;
-            running.stop();
+        if (editor == null) {
+            showNoEditorSelectedDialog();
+            return null;
         }
-        if (coqtopEngine == null) {
-            try {
-                running = new CoqtopEngine(editor);
-                editor.getDocument().putUserData(editorKey, running);
-                return running;
-            } catch (CoqtopPathError coqtopPathError) {
-                JOptionPane.showMessageDialog(null, "Set coq path!");
-                coqtopPathError.printStackTrace();
-                return null;
+
+        try{
+            CoqtopEngine coqtopEngine = editor.getUserData(editorKey);
+            if (coqtopEngine == null){
+                coqtopEngine = new CoqtopEngine(editor);
+                editor.putUserData(editorKey, coqtopEngine);
             }
-        } else throw new InvalidState();
+            else if (running != null && running != coqtopEngine) {
+                if (showEditorChange() == JOptionPane.CANCEL_OPTION) return null;
+                running.stop();
+            }
+            running = coqtopEngine;
+            return coqtopEngine;
+        } catch (IOException ioException){
+            return null;
+        } catch (CoqtopPathError coqtopPathError) {
+            coqtopPathError.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Set coq path!");
+            return null;
+        } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
+            invalidCoqtopResponse.printStackTrace();
+            return null;
+        }
     }
 
     private final EventListenerList listeners = new EventListenerList();
@@ -84,34 +116,71 @@ public class CoqtopEngine implements CoqStateListener {
 
     private String messageText, proofText;
     private final List<CoqState> coqStates = new ArrayList<>();
-    private CoqTopLevel proofTopLevel;
+    private CoqtopInterface proofTopLevel;
 
 
     // View
     private Editor editor;
 
-    private CoqtopEngine(Editor editor) throws IOException, InvalidPrompt, CoqtopPathError {
+    private CoqtopEngine(@NotNull Editor editor) throws IOException, InvalidCoqtopResponse, CoqtopPathError {
 
         CoqTopLevelResponse response;
 
         this.editor = editor;
 
+        Sdk projectSdk = ProjectRootManager.getInstance(editor.getProject()).getProjectSdk();
+
+        if (projectSdk == null){
+            String error_msg =
+                    "Cannot start coqtop: the sdk is not specified.\n"+
+                            "Specifiy the sdk at Project Structure dialog";
 
 
-        proofTopLevel = CoqTopLevel.getCoqTopLevel(editor);
+            JOptionPane.showMessageDialog(null,error_msg, "SDK Error",JOptionPane.ERROR_MESSAGE);
+        }
+
+        File coqtop = JpsCoqSdkType.getByteCodeInterpreterExecutable(projectSdk.getHomePath());
+
+
+        Project project = editor.getProject();
+        ModuleManager manager = ModuleManager.getInstance(editor.getProject());
+        VirtualFile currentFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
+        Module currentModule = null;
+
+        Module[] modules = manager.getModules();
+        for (Module module : modules) {
+            if (module.getModuleScope().accept(currentFile)){
+                currentModule = module;
+                break;
+            }
+        }
+
+        ModuleRootManager root = ModuleRootManager.getInstance(currentModule);
+        VirtualFile[] roots = root.getSourceRoots();
+        List<File> include = new ArrayList<>();
+        for (VirtualFile vfile : roots){
+            include.add(new File(vfile.getPath()));
+            for (VirtualFile vfile2 : FilesUtil.getSubdirs(vfile))
+                include.add(new File(vfile2.getPath()));
+        }
+
+        File base = new File(currentModule.getModuleFile().getParent().getPath());
+
+        proofTopLevel = new CoqtopInterface(coqtop, base, include.toArray(new File[0]));
+
         response = proofTopLevel.start();
+
         coqStates.add(new CoqState(response.prompt, 0));
 
 
         // TODO : FIND ANOTHER WAY TO RECORD LISTENERS
-        addCoqStateListener(this);
-        if (proofView != null) addProofViewListener(proofView);
-        if (messageView != null) {
-            addMessageViewListener(messageView);
-            addCoqStateListener(messageView);
-        }
+        //addCoqStateListener(this);
+        //if (proofView != null) addProofViewListener(proofView);
+        //if (messageView != null) {
+        //    addMessageViewListener(messageView);
+        //    addCoqStateListener(messageView);
+        //}
     }
-
 
     private void setMessageText(String str){
         messageText = str;
@@ -152,7 +221,7 @@ public class CoqtopEngine implements CoqStateListener {
     }
 
 
-    public boolean next() throws IOException, NoCoqProcess, InvalidPrompt {
+    public boolean next() {
 
         Document document = editor.getDocument();
 
@@ -188,7 +257,14 @@ public class CoqtopEngine implements CoqStateListener {
             }
             cmd = document.getText(new TextRange(startOffset, endOffset)).replace('\n', ' ');
         }
-        CoqTopLevelResponse response = proofTopLevel.send(cmd);
+        CoqTopLevelResponse response = null;
+        try {
+            response = proofTopLevel.send(cmd);
+        } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
+            invalidCoqtopResponse.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         CoqTopLevelPrompt prompt = response.prompt;
 
@@ -202,44 +278,44 @@ public class CoqtopEngine implements CoqStateListener {
             restoreCoqState(prompt.getGlobalCounter());
         } else {
             // TODO : Put in red
-            setMessageText(response.message.message());
+            setMessageText(response.message());
             setProofText("");
             return false;
         }
         if (response.prompt.getProofCounter() == 0) { // TODO : METHODE DE TEST KIND DANS RESPONSE
-            setMessageText(response.message.message());
+            setMessageText(response.message());
             setProofText("");
         }
         else {
             setMessageText("");
-            setProofText(response.message.message());
+            setProofText(response.message());
         }
         return true;
     }
 
 
-    public void undo() throws NoCoqProcess, IOException, InvalidPrompt {
+    public void undo() throws NoCoqProcess, IOException, InvalidCoqtopResponse {
 
         if (coqStates.size() == 1)  return;
 
         int lastState = coqStates.get(1).globalCounter;
-        CoqTopLevelResponse response = proofTopLevel.backTo(lastState);
+        CoqTopLevelResponse response = proofTopLevel.send(CoqtopUtil.backTo(lastState));
         if (response.prompt.getProofCounter() == 0) // TODO : METHODE DE TEST KIND DANS RESPONSE
         // TODO : MAUVAIS CRITERE LE COMPTEUR PEUT ETRE nul EN CAS D'erreur dans une preuve
-            setMessageText(response.message.message());
-        else setProofText(response.message.message());
+            setMessageText(response.message());
+        else setProofText(response.message());
         restoreCoqState(response.prompt.getGlobalCounter());
     }
 
-    public void use() throws NoCoqProcess, IOException, InvalidPrompt {
+    public void use() throws NoCoqProcess, IOException, InvalidCoqtopResponse {
         while (next());
     }
 
-    public void retract() throws NoCoqProcess, IOException, InvalidPrompt {
-        CoqTopLevelResponse response = proofTopLevel.backTo(1);
+    public void retract() throws NoCoqProcess, IOException, InvalidCoqtopResponse {
+        CoqTopLevelResponse response = proofTopLevel.send(CoqtopUtil.backTo(1));
         if (response.prompt.getProofCounter() == 0) // TODO : METHODE DE TEST KIND DANS RESPONSE
-            setMessageText(response.message.message());
-        else setProofText(response.message.message());
+            setMessageText(response.message());
+        else setProofText(response.message());
         restoreCoqState(response.prompt.getGlobalCounter());
     }
 

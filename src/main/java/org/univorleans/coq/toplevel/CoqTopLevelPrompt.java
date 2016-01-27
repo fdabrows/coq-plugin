@@ -1,6 +1,6 @@
 /*
  * IntelliJ-coqplugin  / Plugin IntelliJ for Coq
- * Copyright (c) 2016
+ * Copyright (c) 2016 F.Dabrowski
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,6 +17,8 @@
 
 package org.univorleans.coq.toplevel;
 
+import org.univorleans.coq.errors.InvalidCoqtopResponse;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +33,7 @@ public class CoqTopLevelPrompt {
     private String name2;
     private int num2;
 
-    public CoqTopLevelPrompt(String prompt){
+    public CoqTopLevelPrompt(String prompt) throws InvalidCoqtopResponse {
         Matcher m = p_prompt.matcher(prompt);
         if (m.matches()) {
             name1 = m.group(1);
@@ -39,8 +41,8 @@ public class CoqTopLevelPrompt {
             name2 = m.group(2);
             num2 = Integer.valueOf(m.group(4));
         }
-        else {
-        }
+        else throw new InvalidCoqtopResponse(prompt);
+
     }
 
     public int getGlobalCounter(){

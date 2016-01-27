@@ -15,29 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.univorleans.coq.toplevel;
+package org.univorleans.coq.errors;
 
-import java.util.List;
+public class InvalidCoqtopResponse extends Exception {
 
-public class CoqTopLevelMessage {
+    public final String str;
 
-
-    private List<String> message;
-
-    public CoqTopLevelMessage(List<String> msg){
-        message = msg;
-    }
-
-    public String message(){
-        String msg = "";
-        if (message == null) return msg;
-        for (int i =0; i < message.size(); i++)
-            msg += (message.get(i) + "\n");
-        return msg;
-    }
-
-    @Override
-    public String toString(){
-        return message();
+    public InvalidCoqtopResponse(String str){
+        this.str = str;
     }
 }

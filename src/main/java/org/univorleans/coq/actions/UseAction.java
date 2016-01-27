@@ -20,36 +20,22 @@ package org.univorleans.coq.actions;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.univorleans.coq.files.CoqFileType;
-import org.univorleans.coq.errors.InvalidPrompt;
-import org.univorleans.coq.errors.InvalidState;
-import org.univorleans.coq.errors.NoCoqProcess;
 import org.univorleans.coq.toplevel.CoqtopEngine;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 
-import java.io.IOException;
-
 public class UseAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
 
-        try {
             Project p = e.getProject();
             Editor editor = FileEditorManager.getInstance(p).getSelectedTextEditor();
             if (editor == null) return;
             CoqtopEngine coqtopEngine = CoqtopEngine.getEngine(editor);
             if (coqtopEngine != null) coqtopEngine.next();
 
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (InvalidPrompt invalidPrompt) {
-            invalidPrompt.printStackTrace();
-        } catch (NoCoqProcess noCoqProcess) {
-            noCoqProcess.printStackTrace();
-        } catch (InvalidState invalidState) {
-            invalidState.printStackTrace();
-        }
+
     }
 
     @Override

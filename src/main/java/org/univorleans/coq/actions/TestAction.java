@@ -2,8 +2,12 @@ package org.univorleans.coq.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.jps.incremental.BuilderService;
 import org.univorleans.coq.jps.builder.CoqBuilderService;
+import org.univorleans.coq.toplevel.CoqtopEngine;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,24 +22,9 @@ public class TestAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
-        System.out.println("Test"); System.out.flush();
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        //ClassLoader cl = TestAction.class.getClassLoader();
-        CoqBuilderService bs = new CoqBuilderService();
-        try {
-            Enumeration<URL> urls = cl.getResources("META-INF/services/org.jetbrains.jps.incremental.BuilderService");
-            while (urls.hasMoreElements()){
-                System.out.println(urls.nextElement().getPath());
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        ServiceLoader<BuilderService> bds  = ServiceLoader.load(BuilderService.class);
-        Iterator<BuilderService> it = bds.iterator();
-        while(it.hasNext())
-            System.out.println(it.next());
+        Project p = anActionEvent.getProject();
+        Editor editor = FileEditorManager.getInstance(p).getSelectedTextEditor();
+        CoqtopEngine.getEngine(editor);
 
     }
 }

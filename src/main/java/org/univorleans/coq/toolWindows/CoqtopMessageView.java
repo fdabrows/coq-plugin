@@ -1,6 +1,5 @@
 package org.univorleans.coq.toolWindows;
 
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -9,11 +8,9 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
-import org.univorleans.coq.errors.InvalidPrompt;
-import org.univorleans.coq.errors.InvalidState;
+import org.univorleans.coq.errors.InvalidCoqtopResponse;
 import org.univorleans.coq.errors.NoCoqProcess;
 import org.univorleans.coq.listeners.MessageTextListener;
-import org.univorleans.coq.listeners.ProofTextListener;
 import org.univorleans.coq.toplevel.CoqState;
 import org.univorleans.coq.toplevel.CoqStateListener;
 import org.univorleans.coq.toplevel.CoqtopEngine;
@@ -62,7 +59,7 @@ public class CoqtopMessageView implements ToolWindowFactory, MessageTextListener
             coqtopEngine = CoqtopEngine.getEngine(editor);
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InvalidPrompt invalidPrompt) {
+        } catch (InvalidCoqtopResponse invalidPrompt) {
             invalidPrompt.printStackTrace();
         } catch (InvalidState invalidState) {
             invalidState.printStackTrace();
@@ -77,43 +74,28 @@ public class CoqtopMessageView implements ToolWindowFactory, MessageTextListener
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
+
                     Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
                     CoqtopEngine coqtopEngine = CoqtopEngine.getEngine(editor);
                     if (coqtopEngine == null) return;
                     coqtopEngine.next();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                } catch (NoCoqProcess noCoqProcess) {
-                    noCoqProcess.printStackTrace();
-                } catch (InvalidPrompt invalidPrompt) {
-                    invalidPrompt.printStackTrace();
-                } catch (NullPointerException e2){
-                    e2.printStackTrace();
-                } catch (InvalidState invalidState) {
-                    invalidState.printStackTrace();
-                }
-            }
-        });
+            }});
 
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
                     Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
                     CoqtopEngine coqtopEngine = CoqtopEngine.getEngine(editor);
+                try {
                     coqtopEngine.undo();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
                 } catch (NoCoqProcess noCoqProcess) {
                     noCoqProcess.printStackTrace();
-                } catch (InvalidPrompt invalidPrompt) {
-                    invalidPrompt.printStackTrace();
-                } catch (NullPointerException e2){
-                    e2.printStackTrace();
-                } catch (InvalidState invalidState) {
-                    invalidState.printStackTrace();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
+                    invalidCoqtopResponse.printStackTrace();
                 }
+
             }
         });
         button3.addActionListener(new ActionListener() {
@@ -127,12 +109,10 @@ public class CoqtopMessageView implements ToolWindowFactory, MessageTextListener
                     e1.printStackTrace();
                 } catch (NoCoqProcess noCoqProcess) {
                     noCoqProcess.printStackTrace();
-                } catch (InvalidPrompt invalidPrompt) {
-                    invalidPrompt.printStackTrace();
+                } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
+                    invalidCoqtopResponse.printStackTrace();
                 } catch (NullPointerException e2){
                     e2.printStackTrace();
-                } catch (InvalidState invalidState) {
-                    invalidState.printStackTrace();
                 }
             }
         });
@@ -147,31 +127,20 @@ public class CoqtopMessageView implements ToolWindowFactory, MessageTextListener
                     e1.printStackTrace();
                 } catch (NoCoqProcess noCoqProcess) {
                     noCoqProcess.printStackTrace();
-                } catch (InvalidPrompt invalidPrompt) {
-                    invalidPrompt.printStackTrace();
+                } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
+                    invalidCoqtopResponse.printStackTrace();
                 } catch (NullPointerException e2){
                     e2.printStackTrace();
-                } catch (InvalidState invalidState) {
-                    invalidState.printStackTrace();
                 }
             }
         });
         button5.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+                   Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
                     CoqtopEngine coqtopEngine = CoqtopEngine.getEngine(editor);
                     coqtopEngine.gotoCursor();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                } catch (InvalidPrompt invalidPrompt) {
-                    invalidPrompt.printStackTrace();
-                } catch (NullPointerException e2){
-                    e2.printStackTrace();
-                } catch (InvalidState invalidState) {
-                    invalidState.printStackTrace();
-                }
+
             }
         });
         button6.addActionListener(new ActionListener() {
@@ -183,12 +152,6 @@ public class CoqtopMessageView implements ToolWindowFactory, MessageTextListener
                     coqtopEngine.stop();
                 } catch (IOException e1) {
                     e1.printStackTrace();
-                } catch (InvalidPrompt invalidPrompt) {
-                    invalidPrompt.printStackTrace();
-                } catch (NullPointerException e2){
-                    e2.printStackTrace();
-                } catch (InvalidState invalidState) {
-                    invalidState.printStackTrace();
                 }
             }
         });

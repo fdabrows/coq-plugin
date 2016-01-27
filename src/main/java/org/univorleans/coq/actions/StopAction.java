@@ -21,8 +21,6 @@ package org.univorleans.coq.actions;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.univorleans.coq.files.CoqFileType;
-import org.univorleans.coq.errors.InvalidPrompt;
-import org.univorleans.coq.errors.InvalidState;
 import org.univorleans.coq.toplevel.CoqtopEngine;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -44,11 +42,6 @@ public class StopAction extends AnAction {
             if (coqtopEngine != null) coqtopEngine.stop();
         } catch (IOException ioException){
             ioException.printStackTrace();
-        } catch (InvalidPrompt invalidPrompt) {
-            System.out.println("Invalid Prompt " + invalidPrompt.str);
-            invalidPrompt.printStackTrace();
-        } catch (InvalidState invalidState) {
-            invalidState.printStackTrace();
         }
     }
 
