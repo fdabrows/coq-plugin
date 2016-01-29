@@ -33,19 +33,11 @@ import java.io.IOException;
 public class BackAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
-        try {
             Project p = e.getProject();
             Editor editor = FileEditorManager.getInstance(p).getSelectedTextEditor();
             if (editor == null) return;
             CoqtopEngine coqtopEngine = CoqtopEngine.getEngine(editor);
             if (coqtopEngine != null) coqtopEngine.undo();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        } catch (NoCoqProcess noCoqProcess) {
-            noCoqProcess.printStackTrace();
-        } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
-            invalidCoqtopResponse.printStackTrace();
-        }
     }
 
     @Override

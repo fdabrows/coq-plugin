@@ -23,17 +23,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class CoqTopLevelResponse {
+public class CoqtopResponse {
+
+
+    public final static int PROOFMODE = 1;
+    public final static int GENERALMODE = 0;
 
     public static final Pattern p_prompt =
             Pattern.compile("<prompt>([a-zA-Z0-9_]+)\\s<\\s([0-9]+)\\s\\|([a-zA-Z0-9_]+)?\\|\\s([0-9]+)\\s<\\s</prompt>");
 
     public final String preprompt;
-    public final CoqTopLevelPrompt prompt;
+    public final CoqtopPrompt prompt;
     public final List<String> message;
 
 
-    public CoqTopLevelResponse(String preprompt, CoqTopLevelPrompt prompt, List<String> message) throws InvalidCoqtopResponse {
+    public CoqtopResponse(String preprompt, CoqtopPrompt prompt, List<String> message) throws InvalidCoqtopResponse {
         this.preprompt = preprompt;
         this.prompt = prompt;
         if (message != null) this.message = message;
@@ -46,6 +50,11 @@ public class CoqTopLevelResponse {
         for (int i =0; i < message.size(); i++)
             msg += (message.get(i) + "\n");
         return msg;
+    }
+
+    public int mode(){
+        if (prompt.getProofCounter() == 0) return GENERALMODE;
+        else return PROOFMODE;
     }
 
 }

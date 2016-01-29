@@ -17,11 +17,17 @@
 
 package org.univorleans.coq.toplevel;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+import org.junit.experimental.theories.suppliers.TestedOn;
 import org.univorleans.coq.errors.InvalidCoqtopResponse;
+import org.univorleans.coq.util.FilesUtil;
+import org.univorleans.coq.util.ProcessChannels;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +63,7 @@ public class CoqtopUtil {
             builder.append(c);
             if (c == '>') {
                 String str = builder.toString();
-                if (CoqTopLevelResponse.p_prompt.matcher(str).matches()) return str;
+                if (CoqtopResponse.p_prompt.matcher(str).matches()) return str;
             }
         }
         throw new InvalidCoqtopResponse(builder.toString());
@@ -77,16 +83,54 @@ public class CoqtopUtil {
     }
 
     @NotNull
-    public static CoqTopLevelResponse readResponse(@NotNull ProcessChannels processChannels) throws IOException, InvalidCoqtopResponse {
+    public static CoqtopResponse readResponse(@NotNull ProcessChannels processChannels) throws IOException, InvalidCoqtopResponse {
 
         String prePrompt = readPrePrompt(processChannels);
-        CoqTopLevelPrompt prompt = new CoqTopLevelPrompt(readPrompt(processChannels));
+        CoqtopPrompt prompt = CoqtopPrompt.makePrompt(readPrompt(processChannels));
         List<String> message = CoqtopUtil.readMessage(processChannels);
-        return new CoqTopLevelResponse(prePrompt, prompt, message);
+        return new CoqtopResponse(prePrompt, prompt, message);
     }
 
     @NotNull
     public static String backTo(int n) throws InvalidCoqtopResponse, IOException {
         return "BackTo " + n + ".";
+    }
+
+    public static boolean isCommand (String str){
+        int cpt = 0;
+        for (int i =0; i < str.length() - 1; i++){
+            if (str.charAt(i) == '(' && str.charAt(i+1) == '*') cpt++;
+            if (str.charAt(i) == '*' && str.charAt(i+1) == ')') cpt--;
+        }
+        return (cpt == 0);
+    }
+
+    public static Module getModule(ModuleManager manager, VirtualFile file){
+        Module currentModule = null;
+
+        Module[] modules = manager.getModules();
+        for (Module module : modules) {
+            if (module.getModuleScope().accept(file)){
+                currentModule = module;
+                break;
+            }
+        }
+        return currentModule;
+    }
+
+    public static File[] getSourceRoots(ModuleManager manager, VirtualFile file){
+
+        Module currentModule = getModule(manager, file);
+
+        ModuleRootManager root = ModuleRootManager.getInstance(currentModule);
+        VirtualFile[] roots = root.getSourceRoots();
+        List<File> include = new ArrayList<>();
+        for (VirtualFile vfile : roots){
+            include.add(new File(vfile.getPath()));
+            for (VirtualFile vfile2 : FilesUtil.getSubdirs(vfile))
+                include.add(new File(vfile2.getPath()));
+        }
+
+        return include.toArray(new File[0]);
     }
 }

@@ -22,6 +22,7 @@ import java.io.*;
 import org.jetbrains.annotations.NotNull;
 
 import org.univorleans.coq.errors.InvalidCoqtopResponse;
+import org.univorleans.coq.util.ProcessChannels;
 
 /**
  * An interface to coqtop processes
@@ -57,7 +58,7 @@ public class CoqtopInterface {
      * @throws InvalidCoqtopResponse : if receives a ill-formed response
      */
     @NotNull
-    public CoqTopLevelResponse start() throws IOException, InvalidCoqtopResponse {
+    public CoqtopResponse start() throws IOException, InvalidCoqtopResponse {
 
         if (process != null) throw new IllegalStateException();
         process = Runtime.getRuntime().exec(CoqtopUtil.makeCommand(coqtop, include), null, base);
@@ -84,7 +85,7 @@ public class CoqtopInterface {
      * @throws IOException : if communication with coqtop fails
      */
     @NotNull
-    public CoqTopLevelResponse send (@NotNull String cmd) throws InvalidCoqtopResponse, IOException {
+    public CoqtopResponse send (@NotNull String cmd) throws InvalidCoqtopResponse, IOException {
 
         if (process == null) throw new IllegalStateException();
         processChannels.input.write(cmd + "\n");

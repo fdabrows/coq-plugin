@@ -17,20 +17,8 @@
 
 package org.univorleans.coq.toplevel;
 
-public class CoqState {
+import java.util.EventListener;
 
-    public final int globalCounter;
-    public final int proofCounter;
-    public final int offset;
-
-    public CoqState(CoqTopLevelPrompt prompt, int offset){
-        this.globalCounter = prompt.getGlobalCounter();
-        this.proofCounter = prompt.getProofCounter();
-        this.offset = offset;
-    }
-
-    public String toString(){
-        return "(" + globalCounter +" | " + proofCounter + " | " + offset +")";
-    }
-
+public interface CoqtopStackListener extends EventListener {
+    void coqStateChangee(CoqtopState c);
 }

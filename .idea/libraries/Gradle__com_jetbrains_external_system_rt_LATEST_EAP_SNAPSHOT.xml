@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.jetbrains:external-system-rt:LATEST-EAP-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/3f6141206b1d24f2f7e66db372a0abbcd9ba0239/ideaIC-LATEST-EAP-SNAPSHOT/lib/external-system-rt.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/b39c7fc8f01530041e2b258f5d41c0930c1389b2/ideaIC-LATEST-EAP-SNAPSHOT/lib/external-system-rt.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/d4b34ccdbfb2433e9281752fa884be72e7133969/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/9529314d0ed1ed276117090e9cc33f130c33bcc1/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

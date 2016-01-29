@@ -6,7 +6,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.StringReader;
 
 import static org.junit.Assert.*;
 
@@ -68,5 +70,6 @@ public class CoqtopUtilTest {
             assertTrue (cmd[i].equals(expected[i]));
         }
     }
+
 
 }

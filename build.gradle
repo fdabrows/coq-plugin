@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.intellij' version '0.0.35'
+    id 'org.jetbrains.intellij' version "0.0.15"
 }
 
 allprojects {
@@ -24,6 +24,7 @@ repositories {
     flatDir {
         dirs 'libs'
     }
+    mavenCentral()
 }
 
 

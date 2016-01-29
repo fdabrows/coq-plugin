@@ -17,8 +17,26 @@
 
 package org.univorleans.coq.toplevel;
 
-import java.util.EventListener;
+/**
+ * Represents both the internal state of coqtop and the offset
+ * of the current editor
+ */
 
-public interface CoqStateListener extends EventListener {
-    void coqStateChangee(CoqState c);
+public class CoqtopState {
+
+    public final int globalCounter;
+    public final int proofCounter;
+    public final int offset;
+
+    public CoqtopState(CoqtopResponse response, int offset){
+
+        this.globalCounter = response.prompt.getGlobalCounter();
+        this.proofCounter = response.prompt.getProofCounter();
+        this.offset = offset;
+    }
+
+    public String toString(){
+        return "(" + globalCounter +" | " + proofCounter + " | " + offset +")";
+    }
+
 }
