@@ -120,6 +120,7 @@ public class CoqtopMessageView implements ToolWindowFactory{
     }
 
     public void setText(String txt) {
+
         textArea1.setText(txt);
     }
 }

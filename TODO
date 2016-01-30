@@ -1,1 +1,10 @@
-Gerer l'erreur de syntaxe dans le calcul de dépendance.
+Test coqstate
+Gerer le cas du restore d'un etat supprimé, previous si pas 2 éléments
+Restore retire les états qu'il croise sans savoir s'il trouvera l'élément voulu
+Indentation
+Probleme avec last et firts, pas de marquage et saut partiel (utiliser un listener pour le marquage)
+
+Methode speciale pour l'affichage des reponses.
+Preprompt peut prendre plusieurs lignes
+
+// Test : coqtop sur un fichier qui n'est pas dans un module/sourceroot

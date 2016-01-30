@@ -17,6 +17,9 @@
 
 package org.univorleans.coq.toplevel;
 
+import org.univorleans.coq.errors.InvalidState;
+
+import javax.naming.directory.InvalidSearchControlsException;
 import javax.swing.event.EventListenerList;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,40 +33,63 @@ public class CoqtopStack {
 
     private final EventListenerList listeners = new EventListenerList();
 
-    public void save(CoqtopState c){
-        if (coqtopStates.get(0).proofCounter != 0 && c.proofCounter == 0)
-            while (coqtopStates.get(0).proofCounter != 0)
-                coqtopStates.remove(0);
-        coqtopStates.add(0, c);
+    public void save(CoqtopState c) throws InvalidState {
+        if (c.proofCounter == 0)
+            while (coqtopStates.size() > 0 && top().proofCounter != 0) pop();
+        push(c);
         fireCoqStateChanged();
     }
 
-    public void restore(int counter){
-        assert counter >= 1;
-        while (coqtopStates.get(0).globalCounter != counter)
-            coqtopStates.remove(0);
+    public void restore(int counter) throws InvalidState {
+        while (coqtopStates.size() > 0 && top().globalCounter != counter) pop();
         fireCoqStateChanged();
-    }
-
-    public CoqtopState current(){
-        return coqtopStates.get(0);
     }
 
     public boolean hasPrevious(){
         return coqtopStates.size() > 1;
     }
 
-    public CoqtopState previous(){
-        return coqtopStates.get(1);
+    public CoqtopState previous() throws InvalidState {
+        try {
+            return coqtopStates.get(1);
+        } catch (IndexOutOfBoundsException e){
+            throw new InvalidState();
+        }
+    }
+
+    public void push(CoqtopState c) throws InvalidState{
+        try{
+            coqtopStates.add(0,c);
+        } catch (IndexOutOfBoundsException e){
+            throw new InvalidState();
+        }
+    }
+
+    public CoqtopState top() throws InvalidState {
+        try {
+            return coqtopStates.get(0);
+        } catch (IndexOutOfBoundsException e){
+            throw new InvalidState();
+        }
+    }
+
+    public void pop() throws InvalidState{
+        try{
+            coqtopStates.remove(0);
+        } catch (IndexOutOfBoundsException e){
+            throw new InvalidState();
+        }
     }
 
     public void addCoqStateListener(CoqtopStackListener listener){
         listeners.add(CoqtopStackListener.class, listener);
     }
 
-    public void fireCoqStateChanged(){
+    public void fireCoqStateChanged() throws InvalidState {
         for (CoqtopStackListener listener : listeners.getListeners(CoqtopStackListener.class)){
-            listener.coqStateChangee(current());
+                listener.coqStateChangee(top());
+
         }
     }
+
 }

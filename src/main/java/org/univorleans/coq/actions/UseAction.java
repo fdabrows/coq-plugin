@@ -1,6 +1,6 @@
 /*
  * IntelliJ-coqplugin  / Plugin IntelliJ for Coq
- * Copyright (c) 2016
+ * Copyright (c) 2016 F. Dabrowski
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -29,23 +29,10 @@ public class UseAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
 
-            Project p = e.getProject();
-            Editor editor = FileEditorManager.getInstance(p).getSelectedTextEditor();
-            if (editor == null) return;
+        Editor editor = FileEditorManager.getInstance(e.getProject()).getSelectedTextEditor();
+        if (editor != null) {
             CoqtopEngine coqtopEngine = CoqtopEngine.getEngine(editor);
             if (coqtopEngine != null) coqtopEngine.next();
-
-
-    }
-
-    @Override
-    public void update(final AnActionEvent event)
-    {
-        DataContext dataContext = event.getDataContext();
-        VirtualFile file = PlatformDataKeys.VIRTUAL_FILE.getData(dataContext);
-        boolean enabled = (file != null && file.getFileType() == CoqFileType.INSTANCE);
-        Presentation presentation = event.getPresentation();
-        presentation.setVisible(true);
-        presentation.setEnabled(enabled);
+        }
     }
 }

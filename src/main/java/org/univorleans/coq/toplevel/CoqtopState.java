@@ -28,15 +28,19 @@ public class CoqtopState {
     public final int proofCounter;
     public final int offset;
 
-    public CoqtopState(CoqtopResponse response, int offset){
+    public CoqtopState(CoqtopPrompt prompt, int offset){
 
-        this.globalCounter = response.prompt.getGlobalCounter();
-        this.proofCounter = response.prompt.getProofCounter();
+        this.globalCounter = prompt.getGlobalCounter();
+        this.proofCounter = prompt.getProofCounter();
         this.offset = offset;
     }
 
     public String toString(){
         return "(" + globalCounter +" | " + proofCounter + " | " + offset +")";
+    }
+
+    public boolean equals(CoqtopState state){
+        return globalCounter == this.globalCounter && proofCounter == this.proofCounter && offset == this.offset;
     }
 
 }

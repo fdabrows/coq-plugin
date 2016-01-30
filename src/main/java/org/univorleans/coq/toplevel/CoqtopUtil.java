@@ -27,6 +27,7 @@ import org.univorleans.coq.errors.InvalidCoqtopResponse;
 import org.univorleans.coq.util.FilesUtil;
 import org.univorleans.coq.util.ProcessChannels;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,16 +51,28 @@ public class CoqtopUtil {
     }
 
     @NotNull
-    public static String readPrePrompt(@NotNull ProcessChannels processChannels) throws IOException {
-        return processChannels.error.readLine();
+    private static List<String> readPrePrompt(@NotNull ProcessChannels processChannels) throws IOException {
+        List <String> list = new ArrayList<>();
+        list.add(processChannels.error.readLine());
+        while (processChannels.error.ready()){
+            processChannels.error.mark(1);
+            char c = (char) processChannels.error.read();
+            processChannels.error.reset();
+            if (c =='<') break;
+            list.add(processChannels.error.readLine());
+        }
+        return list;
     }
 
     @NotNull
-    public static String readPrompt(@NotNull  ProcessChannels processChannels) throws IOException, InvalidCoqtopResponse {
+    private static String readPrompt(@NotNull  ProcessChannels processChannels) throws IOException, InvalidCoqtopResponse {
 
         StringBuilder builder = new StringBuilder();
+        char c = (char) (processChannels.error.read());
+        while (c != '<') c = (char) (processChannels.error.read());
+        builder.append(c);
         while (processChannels.error.ready()) {
-            char c = (char) (processChannels.error.read());
+            c = (char) (processChannels.error.read());
             builder.append(c);
             if (c == '>') {
                 String str = builder.toString();
@@ -70,7 +83,7 @@ public class CoqtopUtil {
     }
 
     @NotNull
-    public static List<String> readMessage(@NotNull ProcessChannels processChannels) throws IOException {
+    private static List<String> readMessage(@NotNull ProcessChannels processChannels) throws IOException {
 
         List<String> messageList = new ArrayList<>();
         if (processChannels.output.ready()) {
@@ -85,9 +98,12 @@ public class CoqtopUtil {
     @NotNull
     public static CoqtopResponse readResponse(@NotNull ProcessChannels processChannels) throws IOException, InvalidCoqtopResponse {
 
-        String prePrompt = readPrePrompt(processChannels);
-        CoqtopPrompt prompt = CoqtopPrompt.makePrompt(readPrompt(processChannels));
+        List<String> prePrompt = readPrePrompt(processChannels);
+        String str = readPrompt(processChannels);
+        CoqtopPrompt prompt = CoqtopPrompt.makePrompt(str);
         List<String> message = CoqtopUtil.readMessage(processChannels);
+
+
         return new CoqtopResponse(prePrompt, prompt, message);
     }
 
@@ -118,9 +134,8 @@ public class CoqtopUtil {
         return currentModule;
     }
 
-    public static File[] getSourceRoots(ModuleManager manager, VirtualFile file){
+    public static File[] getSourceRoots(Module currentModule){
 
-        Module currentModule = getModule(manager, file);
 
         ModuleRootManager root = ModuleRootManager.getInstance(currentModule);
         VirtualFile[] roots = root.getSourceRoots();
@@ -133,4 +148,6 @@ public class CoqtopUtil {
 
         return include.toArray(new File[0]);
     }
+
+
 }

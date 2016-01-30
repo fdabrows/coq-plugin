@@ -32,24 +32,38 @@ public class CoqtopResponse {
     public static final Pattern p_prompt =
             Pattern.compile("<prompt>([a-zA-Z0-9_]+)\\s<\\s([0-9]+)\\s\\|([a-zA-Z0-9_]+)?\\|\\s([0-9]+)\\s<\\s</prompt>");
 
-    public final String preprompt;
+    public final List<String> preprompt;
     public final CoqtopPrompt prompt;
     public final List<String> message;
 
+    String msg = "";
+    String info = "";
 
-    public CoqtopResponse(String preprompt, CoqtopPrompt prompt, List<String> message) throws InvalidCoqtopResponse {
-        this.preprompt = preprompt;
+
+    public CoqtopResponse(List<String> preprompt, CoqtopPrompt prompt, List<String> message) throws InvalidCoqtopResponse {
         this.prompt = prompt;
+
+        if (preprompt != null) this.preprompt = preprompt;
+        else this.preprompt = new ArrayList<>();
+        if (preprompt != null)
+            for (int i =0; i < preprompt.size(); i++)
+                info += (preprompt.get(i) + "\n");
+
         if (message != null) this.message = message;
         else this.message = new ArrayList<>();
+        if (message != null)
+        for (int i =0; i < message.size(); i++)
+                msg += (message.get(i) + "\n");
     }
 
     public String message(){
-        String msg = "";
-        if (message == null) return msg;
-        for (int i =0; i < message.size(); i++)
-            msg += (message.get(i) + "\n");
+
         return msg;
+    }
+
+    public String info(){
+
+        return info;
     }
 
     public int mode(){

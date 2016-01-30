@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.univorleans.coq.errors.CoqtopPathError;
 import org.univorleans.coq.errors.InvalidCoqtopResponse;
+import org.univorleans.coq.errors.InvalidState;
 import org.univorleans.coq.jps.model.JpsCoqSdkType;
 import org.univorleans.coq.listeners.MessageTextListener;
 import com.intellij.openapi.editor.Editor;
@@ -122,17 +123,29 @@ public class CoqtopEngine implements CoqtopStackListener {
         ModuleManager manager = ModuleManager.getInstance(editor.getProject());
 
         VirtualFile currentFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
-        Module currentModule = CoqtopUtil.getModule(manager, currentFile);
-        File base = new File(currentModule.getModuleFile().getParent().getPath());
 
-        File[] include = CoqtopUtil.getSourceRoots(manager, currentFile);
+
+        Module currentModule = CoqtopUtil.getModule(manager, currentFile);
+
+        if (currentModule == null){
+            showNoModuleError(currentFile.getName());
+            throw new IOException();
+        }
+        //TODO : Dans le cas d'un import, il n'y a pas de modulefile
+        File base = new File(editor.getProject().getBasePath());
+
+
+        File[] include = CoqtopUtil.getSourceRoots(currentModule);
 
         proofTopLevel = new CoqtopInterface(coqtop, base, include);
 
         CoqtopResponse response = proofTopLevel.start();
 
-        //coqtopStates.add(new CoqtopState(response, 0));
-        coqtopStates.save(new CoqtopState(response, 0));
+        try {
+            coqtopStates.save(new CoqtopState(response.prompt, 0));
+        } catch (InvalidState invalidState) {
+            invalidState.printStackTrace();
+        }
 
         this.editor = editor;
 
@@ -140,6 +153,7 @@ public class CoqtopEngine implements CoqtopStackListener {
 
         addMessageViewListener(CoqtopMessage.INSTANCE);
         addCoqStateListener(CoqtopMessage.INSTANCE);
+        addProofViewListener(CoqtopMessage.INSTANCE);
         addCoqStateListener(this);
 
     }
@@ -147,25 +161,26 @@ public class CoqtopEngine implements CoqtopStackListener {
     public boolean next() {
 
         try {
-            if (!iterator.hasNext(coqtopStates.current().offset)) return false;
+            if (!iterator.hasNext(coqtopStates.top().offset)) return false;
 
-            String cmd = iterator.next(coqtopStates.current().offset);
+            String cmd = iterator.next(coqtopStates.top().offset);
             int endOffset = iterator.getOffset();
 
             CoqtopResponse response = proofTopLevel.send(cmd);
-            CoqtopState newCoqState = new CoqtopState(response, endOffset);
+            CoqtopState newCoqState = new CoqtopState(response.prompt, endOffset);
 
-            if (newCoqState.globalCounter > coqtopStates.current().globalCounter)
+            if (newCoqState.globalCounter > coqtopStates.top().globalCounter)
                 coqtopStates.save(newCoqState);
-            else if (newCoqState.globalCounter < coqtopStates.current().globalCounter)
+            else if (newCoqState.globalCounter < coqtopStates.top().globalCounter)
                 coqtopStates.restore(newCoqState.globalCounter);
             else {
                 setMessageText(response.message());
                 return false;
             }
 
-            if (response.mode() == CoqtopResponse.GENERALMODE)
-                setMessageText(response.message());
+            if (response.mode() == CoqtopResponse.GENERALMODE) {
+                setMessageText(response.message() + "\n\n" + response.info());
+            }
             else setProofText(response.message());
 
             return true;
@@ -176,13 +191,16 @@ public class CoqtopEngine implements CoqtopStackListener {
         } catch (IOException e) {
             e.printStackTrace();
             return false;
+        } catch (InvalidState invalidState) {
+            invalidState.printStackTrace();
+            return false;
         }
     }
 
     public void undo() {
 
         try {
-            if (!coqtopStates.hasPrevious())  return;
+            if (!coqtopStates.hasPrevious()) return;
             int lastState = coqtopStates.previous().globalCounter;
             CoqtopResponse response = proofTopLevel.send(CoqtopUtil.backTo(lastState));
             coqtopStates.restore(response.prompt.getGlobalCounter());
@@ -190,6 +208,8 @@ public class CoqtopEngine implements CoqtopStackListener {
             invalidCoqtopResponse.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InvalidState invalidState) {
+            invalidState.printStackTrace();
         }
 
     }
@@ -212,6 +232,8 @@ public class CoqtopEngine implements CoqtopStackListener {
             invalidCoqtopResponse.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InvalidState invalidState) {
+            invalidState.printStackTrace();
         }
     }
 
@@ -239,7 +261,6 @@ public class CoqtopEngine implements CoqtopStackListener {
         fireProofViewChanged();
     }
 
-
     @Override
     public void coqStateChangee(CoqtopState c) {
         TextAttributes attr = new TextAttributes();
@@ -254,15 +275,18 @@ public class CoqtopEngine implements CoqtopStackListener {
     }
 
     public void addCoqStateListener(CoqtopStackListener listener){
+
         coqtopStates.addCoqStateListener(listener);
     }
 
     public void addProofViewListener(ProofTextListener listener){
+
         listeners.add(ProofTextListener.class, listener);
     }
 
 
     public void addMessageViewListener(MessageTextListener listener){
+
         listeners.add(MessageTextListener.class, listener);
     }
 
@@ -294,6 +318,14 @@ public class CoqtopEngine implements CoqtopStackListener {
                         "Specifiy the sdk at Project Structure dialog";
 
         JOptionPane.showMessageDialog(null,error_msg, "SDK Error",JOptionPane.ERROR_MESSAGE);
+
+    }
+
+    private static void showNoModuleError(String file){
+        String error_msg =
+                "File "+file+" does not belong to a module";
+
+        JOptionPane.showMessageDialog(null,error_msg, "Module Error",JOptionPane.ERROR_MESSAGE);
 
     }
 }

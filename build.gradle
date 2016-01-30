@@ -1,29 +1,32 @@
 plugins {
-    id 'org.jetbrains.intellij' version "0.0.15"
+    id 'org.jetbrains.intellij' version "0.0.39"
 }
 
-allprojects {
 
-    apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'org.jetbrains.intellij'
 
-    sourceSets {
-        main {
-            java.srcDirs 'src/main/java','gen'
-            resources.srcDir 'src/main/resources'
-        }
-        test {
-            java.srcDir 'src/test/java'
-        }
+intellij {
+    version 'IC-15.0.3' //IntelliJ IDEA dependency
+    plugins 'coverage' //Bundled plugin dependencies
+    pluginName 'coq-plugin'
+}
+
+sourceSets {
+    main {
+        java.srcDirs 'src/main/java','gen'
+        resources.srcDirs 'src/main/resources'
     }
-
-    apply plugin: "org.jetbrains.intellij"
-
+    test {
+        java.srcDirs 'src/test/java'
+    }
 }
 
 repositories {
-    flatDir {
-        dirs 'libs'
-    }
+//    flatDir {
+//        dirs 'libs'
+//    }
     mavenCentral()
 }
 

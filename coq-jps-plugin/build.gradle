@@ -1,1 +1,2 @@
+apply plugin: 'org.jetbrains.intellij'
 jar.archiveName="coq-jps-plugin.jar"

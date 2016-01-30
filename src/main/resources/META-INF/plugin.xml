@@ -57,18 +57,23 @@
 
       <action id="org.intellij.coq.actions.NextAction" class="org.univorleans.coq.actions.NextAction" text="Next"
               description="Next Line">
+        <keyboard-shortcut first-keystroke="control alt DOWN" keymap="$default"/>
       </action>
       <action id="org.intellij.coq.actions.BackAction" class="org.univorleans.coq.actions.BackAction" text="Undo"
               description="Last Line">
+        <keyboard-shortcut first-keystroke="control alt UP" keymap="$default"/>
       </action>
       <action id="org.intellij.coq.actions.UseAction" class="org.univorleans.coq.actions.UseAction" text="Use"
               description="End of file">
+        <keyboard-shortcut first-keystroke="control alt RIGHT" keymap="$default"/>
       </action>
       <action id="org.intellij.coq.actions.RetractAction" class="org.univorleans.coq.actions.RetractAction" text="Retract"
               description="Last Line">
+        <keyboard-shortcut first-keystroke="control alt LEFT" keymap="$default"/>
       </action>
       <action id="org.intellij.coq.actions.GotoAction" class="org.univorleans.coq.actions.GotoAction" text="Go to cursor"
               description="Last Line">
+        <keyboard-shortcut first-keystroke="control alt ENTER" keymap="$default"/>
       </action>
       <separator/>
       <!-- <add-to-group group-id="MainMenu" relative-to-action="ToolsMenu" anchor="before"/>-->
