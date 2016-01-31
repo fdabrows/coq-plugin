@@ -40,13 +40,18 @@ public class CoqDocumentIterator {
         int endOffset;
         char c;
 
+        String cmd;
+        start = offset;
+
         do{
             endOffset = txt.indexOf('.', offset);
+            cmd = document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
             if (endOffset < 0) return false;
-            if (endOffset == document.getTextLength() - 1) break;
+            if (endOffset == document.getTextLength() - 1)
+                if (isCommand(cmd)) return true; else return false;
             c = txt.charAt(endOffset + 1);
             offset = endOffset + 1;
-        } while (!Character.isWhitespace(c));
+        } while (!Character.isWhitespace(c) || ! isCommand(cmd));
         return true;
     }
 
@@ -55,17 +60,30 @@ public class CoqDocumentIterator {
         String txt = document.getText();
         int endOffset;
         char c;
+        String cmd;
+        start = offset;
 
         do{
-            start = offset;
             endOffset = txt.indexOf('.', offset);
+            cmd = document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
             if (endOffset < 0) return null;
-            if (endOffset == txt.length() - 1) break;
+            if (endOffset == txt.length() - 1 && isCommand(cmd)) break;
             c = txt.charAt(endOffset + 1);
             offset = endOffset + 1;
-        } while (!Character.isWhitespace(c));
+
+        } while (!Character.isWhitespace(c) || ! isCommand(cmd));
+
         nextOffset = endOffset+1;
-        return document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
+        return cmd;
+    }
+
+    private static boolean isCommand (String str){
+        int cpt = 0;
+        for (int i =0; i < str.length() - 1; i++){
+            if (str.charAt(i) == '(' && str.charAt(i+1) == '*') cpt++;
+            if (str.charAt(i) == '*' && str.charAt(i+1) == ')') cpt--;
+        }
+        return (cpt <= 0);
     }
 
     public int getOffset(){

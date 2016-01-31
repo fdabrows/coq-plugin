@@ -32,6 +32,14 @@ public class CoqDocumentIteratorTest {
         document = new MockDocument("Require Import List. Require Import Set.");
         iterator = new CoqDocumentIterator(document);
         assertTrue(iterator.hasNext(20));
+
+        document = new MockDocument("(* . Require Import Set.");
+        iterator = new CoqDocumentIterator(document);
+        assertFalse(iterator.hasNext(0));
+
+        document = new MockDocument("*) Require Import Set.");
+        iterator = new CoqDocumentIterator(document);
+        assertTrue(iterator.hasNext(0));
     }
 
     @Test
@@ -58,6 +66,16 @@ public class CoqDocumentIteratorTest {
         str = iterator.next(20);
         assertTrue(str.equals("Require Import Set."));
         assertTrue(iterator.getOffset() == 40);
+
+        document = new MockDocument("Require Import List. (* . *) Require Import Set.");
+        iterator = new CoqDocumentIterator(document);
+        str = iterator.next(20);
+        assertTrue(str.equals("(* . *) Require Import Set."));
+
+        document = new MockDocument("*) Require Import Set.");
+        iterator = new CoqDocumentIterator(document);
+        str = iterator.next(0);
+        assertTrue(str.equals("*) Require Import Set."));
 
     }
 }

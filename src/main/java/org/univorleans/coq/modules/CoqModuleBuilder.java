@@ -42,6 +42,14 @@ public class CoqModuleBuilder extends JavaModuleBuilder {
                 if (dir != null) contentEntry.addExcludeFolder(dir);
             }
         }*/
+        ContentEntry contentEntry = doAddContentEntry(modifiableRootModel);
+        String rootPath = getContentEntryPath();
+        String folder = rootPath + File.separator + "out";
+        File file = new File(folder);
+        file.mkdir();
+        VirtualFile dir = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
+        if (dir != null) contentEntry.addExcludeFolder(dir);
+
         super.setupRootModel(modifiableRootModel);
         modifiableRootModel.inheritSdk();
     }

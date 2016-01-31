@@ -1,10 +1,12 @@
-Test coqstate
-Gerer le cas du restore d'un etat supprimé, previous si pas 2 éléments
-Restore retire les états qu'il croise sans savoir s'il trouvera l'élément voulu
+Test de lecture des commandes.
+
 Indentation
-Probleme avec last et firts, pas de marquage et saut partiel (utiliser un listener pour le marquage)
+
+Probleme avec last et first, pas de marquage et saut partiel (utiliser un listener pour le marquage)
 
 Methode speciale pour l'affichage des reponses.
-Preprompt peut prendre plusieurs lignes
 
+Probleme de gestion des commentaires avec des points
+Ajouter possibilité d'ajouter des includes
+Ajouter repertoire out pour utiliser les vo.
 // Test : coqtop sur un fichier qui n'est pas dans un module/sourceroot
