@@ -40,6 +40,14 @@ public class CoqDocumentIteratorTest {
         document = new MockDocument("*) Require Import Set.");
         iterator = new CoqDocumentIterator(document);
         assertTrue(iterator.hasNext(0));
+
+        document = new MockDocument("-");
+        iterator = new CoqDocumentIterator(document);
+        assertTrue(iterator.hasNext(0));
+
+        document = new MockDocument("++");
+        iterator = new CoqDocumentIterator(document);
+        assertTrue(iterator.hasNext(0));
     }
 
     @Test
@@ -75,7 +83,24 @@ public class CoqDocumentIteratorTest {
         document = new MockDocument("*) Require Import Set.");
         iterator = new CoqDocumentIterator(document);
         str = iterator.next(0);
-        assertTrue(str.equals("*) Require Import Set."));
+        assertTrue(str.equals("*"));
+
+        document = new MockDocument("-");
+        iterator = new CoqDocumentIterator(document);
+        str = iterator.next(0);
+        assertTrue(str.equals("-"));
+
+        document = new MockDocument("++");
+        iterator = new CoqDocumentIterator(document);
+        str = iterator.next(0);
+        assertTrue(str.equals("++"));
+
+        document = new MockDocument("*** intros.");
+        iterator = new CoqDocumentIterator(document);
+        str = iterator.next(0);
+        assertTrue(str.equals("***"));
+        str = iterator.next(3);
+        assertTrue(str.equals("intros."));
 
     }
 }

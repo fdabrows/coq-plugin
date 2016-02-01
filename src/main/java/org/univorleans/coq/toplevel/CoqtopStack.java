@@ -22,6 +22,7 @@ import org.univorleans.coq.errors.InvalidState;
 import javax.naming.directory.InvalidSearchControlsException;
 import javax.swing.event.EventListenerList;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -87,9 +88,18 @@ public class CoqtopStack {
 
     public void fireCoqStateChanged() throws InvalidState {
         for (CoqtopStackListener listener : listeners.getListeners(CoqtopStackListener.class)){
-                listener.coqStateChangee(top());
-
+                listener.coqStateChangee(this);
         }
+    }
+
+    @Override
+    public String toString(){
+        String msg="";
+        Iterator it = coqtopStates.iterator();
+        while(it.hasNext()){
+            msg = msg + it.next().toString();
+        }
+        return msg;
     }
 
 }

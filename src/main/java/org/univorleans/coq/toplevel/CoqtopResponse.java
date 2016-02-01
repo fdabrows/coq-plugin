@@ -71,4 +71,9 @@ public class CoqtopResponse {
         else return PROOFMODE;
     }
 
+    @Override
+    public String toString(){
+        return info + "</PR>\n" + prompt + "</P>\n" + message()+"</M>\n";
+    }
+
 }

@@ -36,7 +36,7 @@ public class CoqtopState {
     }
 
     public String toString(){
-        return "(" + globalCounter +" | " + proofCounter + " | " + offset +")";
+        return "(" + globalCounter +"|" + proofCounter+")";
     }
 
     public boolean equals(CoqtopState state){

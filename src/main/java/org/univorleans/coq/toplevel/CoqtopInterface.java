@@ -90,6 +90,9 @@ public class CoqtopInterface {
         if (process == null) throw new IllegalStateException();
         processChannels.input.write(cmd + "\n");
         processChannels.input.flush();
-        return CoqtopUtil.readResponse(processChannels);
+        CoqtopResponse response = CoqtopUtil.readResponse(processChannels);
+        //System.out.println(response);
+
+        return response;
     }
 }

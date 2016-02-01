@@ -1,3 +1,7 @@
+
+Read Bullets as commands
+find first non comment caracter. (first non space caracter with 0 parenthesis)
+
 Test de lecture des commandes.
 
 Indentation
@@ -9,4 +13,7 @@ Methode speciale pour l'affichage des reponses.
 Probleme de gestion des commentaires avec des points
 Ajouter possibilité d'ajouter des includes
 Ajouter repertoire out pour utiliser les vo.
+
+<infomsg> pour les bullets.
+
 // Test : coqtop sur un fichier qui n'est pas dans un module/sourceroot

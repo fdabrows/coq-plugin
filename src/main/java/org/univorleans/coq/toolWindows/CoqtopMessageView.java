@@ -43,6 +43,7 @@ public class CoqtopMessageView implements ToolWindowFactory{
     private JButton button1, button2, button3, button4, button5, button6;
     private JPanel panel1;
     private JTextArea textArea1;
+    private JTextArea textArea2;
     private ToolWindow myToolWindow;
 
     Project project;
@@ -122,5 +123,9 @@ public class CoqtopMessageView implements ToolWindowFactory{
     public void setText(String txt) {
 
         textArea1.setText(txt);
+    }
+
+    public void setInfoText(String txt){
+        textArea2.setText(txt);
     }
 }

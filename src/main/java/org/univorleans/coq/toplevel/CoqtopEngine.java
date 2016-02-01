@@ -56,15 +56,14 @@ public class CoqtopEngine implements CoqtopStackListener {
     // this engine is stored in running
 
     private static final Key<CoqtopEngine> editorKey = new Key<CoqtopEngine>("engine");
-    private static CoqtopEngine running = null;
 
+    private static CoqtopEngine running = null;
 
     private final EventListenerList listeners = new EventListenerList();
 
     private String messageText, proofText;
 
     // We use this stack to get offsets
-    //private final List<CoqtopState> coqtopStates = new ArrayList<>();
     private final CoqtopStack coqtopStates = new CoqtopStack();
 
     private CoqtopInterface proofTopLevel;
@@ -87,11 +86,12 @@ public class CoqtopEngine implements CoqtopStackListener {
 
         try{
             CoqtopEngine coqtopEngine = editor.getUserData(editorKey);
+
             if (coqtopEngine == null){
                 coqtopEngine = new CoqtopEngine(editor);
                 editor.putUserData(editorKey, coqtopEngine);
             }
-            else if (running != null && running != coqtopEngine) {
+            if (running != null && running != coqtopEngine) {
                 if (showEditorChange() == JOptionPane.CANCEL_OPTION) return null;
                 running.stop();
             }
@@ -167,6 +167,7 @@ public class CoqtopEngine implements CoqtopStackListener {
             int endOffset = iterator.getOffset();
 
             CoqtopResponse response = proofTopLevel.send(cmd);
+
             CoqtopState newCoqState = new CoqtopState(response.prompt, endOffset);
 
             if (newCoqState.globalCounter > coqtopStates.top().globalCounter)
@@ -244,8 +245,9 @@ public class CoqtopEngine implements CoqtopStackListener {
     public void stop() {
         try {
             proofTopLevel.stop();
+            proofTopLevel = null;
             editor.getMarkupModel().removeAllHighlighters();
-            editor.getDocument().putUserData(editorKey, null);
+            editor.putUserData(editorKey, null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -262,16 +264,20 @@ public class CoqtopEngine implements CoqtopStackListener {
     }
 
     @Override
-    public void coqStateChangee(CoqtopState c) {
-        TextAttributes attr = new TextAttributes();
-        attr.setBackgroundColor(UIUtil.getTreeSelectionBackground());
-        attr.setForegroundColor(UIUtil.getTreeSelectionForeground());
+    public void coqStateChangee(CoqtopStack c) {
         editor.getMarkupModel().removeAllHighlighters();
-        editor.getMarkupModel().addRangeHighlighter(
-                0,c.offset, 3333, attr, HighlighterTargetArea.EXACT_RANGE);
-        RangeMarker marker = editor.getDocument().getOffsetGuard(0);
-        if (marker != null) editor.getDocument().removeGuardedBlock(marker);
-        editor.getDocument().createGuardedBlock(0, c.offset);
+try {
+    TextAttributes attr = new TextAttributes();
+    attr.setBackgroundColor(UIUtil.getTreeSelectionBackground());
+    attr.setForegroundColor(UIUtil.getTreeSelectionForeground());
+    editor.getMarkupModel().addRangeHighlighter(
+            0, c.top().offset, 3333, attr, HighlighterTargetArea.EXACT_RANGE);
+    RangeMarker marker = editor.getDocument().getOffsetGuard(0);
+    if (marker != null) editor.getDocument().removeGuardedBlock(marker);
+    editor.getDocument().createGuardedBlock(0, c.top().offset);
+} catch (InvalidState e){
+    e.printStackTrace();
+}
     }
 
     public void addCoqStateListener(CoqtopStackListener listener){

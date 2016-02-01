@@ -59,6 +59,12 @@
               <text value=""/>
             </properties>
           </component>
+          <component id="2f706" class="javax.swing.JTextArea" binding="textArea2" default-binding="true">
+            <constraints/>
+            <properties>
+              <editable value="false"/>
+            </properties>
+          </component>
         </children>
       </toolbar>
       <component id="b5a53" class="javax.swing.JTextArea" binding="textArea1" default-binding="true">

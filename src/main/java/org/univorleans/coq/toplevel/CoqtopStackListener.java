@@ -20,5 +20,5 @@ package org.univorleans.coq.toplevel;
 import java.util.EventListener;
 
 public interface CoqtopStackListener extends EventListener {
-    void coqStateChangee(CoqtopState c);
+    void coqStateChangee(CoqtopStack c);
 }

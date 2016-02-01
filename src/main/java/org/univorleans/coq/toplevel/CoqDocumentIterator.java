@@ -34,7 +34,9 @@ public class CoqDocumentIterator {
         this.document = document;
     }
 
-    public boolean hasNext(int offset) {
+
+
+    public boolean hasNextCommand(int offset) {
 
         String txt = document.getText();
         int endOffset;
@@ -45,8 +47,8 @@ public class CoqDocumentIterator {
 
         do{
             endOffset = txt.indexOf('.', offset);
-            cmd = document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
             if (endOffset < 0) return false;
+            cmd = document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
             if (endOffset == document.getTextLength() - 1)
                 if (isCommand(cmd)) return true; else return false;
             c = txt.charAt(endOffset + 1);
@@ -55,7 +57,45 @@ public class CoqDocumentIterator {
         return true;
     }
 
-    public String next(int offset) {
+    public boolean hasNext(int startOffset){
+        int offset = startOffset;
+        String txt = document.getText();
+        int cpt = 0;
+        Character c;
+        while (offset < txt.length()){
+            switch (txt.charAt(offset) ){
+                case '(':
+                    if (offset + 1 < txt.length() && txt.charAt(offset+1)=='*') cpt++;
+                    break;
+                case '*':
+                    if (cpt > 0) {
+                        if (offset + 1 < txt.length() && txt.charAt(offset + 1) == ')') cpt--;
+                    } else {
+                        while (offset + 1 < txt.length() && txt.charAt(offset+1)=='*') offset++;
+                        return true;
+                    }
+                    break;
+                case '-':
+                    if (cpt <= 0) {
+                        while (offset + 1 < txt.length() && txt.charAt(offset + 1) == '-') offset++;
+                        return true;
+                    }
+                    break;
+                case '+':
+                    if (cpt <= 0) {
+                        while (offset + 1 < txt.length() && txt.charAt(offset + 1) == '+') offset++;
+                        return true;
+                    }
+                    break;
+                default:
+                    if (cpt <= 0) return hasNextCommand(startOffset);
+            }
+            offset++;
+        }
+        return false;
+    }
+
+    public String nextCommand(int offset) {
 
         String txt = document.getText();
         int endOffset;
@@ -65,8 +105,8 @@ public class CoqDocumentIterator {
 
         do{
             endOffset = txt.indexOf('.', offset);
-            cmd = document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
             if (endOffset < 0) return null;
+            cmd = document.getText(new TextRange(start, endOffset+1)).replace('\n', ' ').trim();
             if (endOffset == txt.length() - 1 && isCommand(cmd)) break;
             c = txt.charAt(endOffset + 1);
             offset = endOffset + 1;
@@ -75,6 +115,48 @@ public class CoqDocumentIterator {
 
         nextOffset = endOffset+1;
         return cmd;
+    }
+
+    public String next(int startOffset){
+
+        int offset = startOffset;
+        String txt = document.getText();
+        int cpt = 0;
+        while (offset < txt.length()){
+            Character c = txt.charAt(offset);
+            switch (c){
+                case '(':
+                    if (offset + 1 < txt.length() && txt.charAt(offset+1)=='*') cpt++;
+                    break;
+                case '*':
+                    if (cpt > 0) {
+                        if (offset + 1 < txt.length() && txt.charAt(offset + 1) == ')') cpt--;
+                    } else {
+                        while (offset + 1 < txt.length() && txt.charAt(offset+1)=='*') offset++;
+                        nextOffset = offset+1;
+                        return document.getText(new TextRange(startOffset, offset+1)).replace('\n', ' ').trim();
+                    }
+                    break;
+                case '-':
+                    if (cpt <= 0) {
+                        while (offset + 1 < txt.length() && txt.charAt(offset + 1) == '-') offset++;
+                        nextOffset = offset+1;
+                        return document.getText(new TextRange(startOffset, offset+1)).replace('\n', ' ').trim();
+                    }
+                    break;
+                case '+':
+                    if (cpt <= 0) {
+                        while (offset + 1 < txt.length() && txt.charAt(offset + 1) == '+') offset++;
+                        nextOffset = offset+1;
+                        return document.getText(new TextRange(startOffset, offset+1)).replace('\n', ' ').trim();
+                    }
+                    break;
+                default:
+                    if (!Character.isWhitespace(c) && cpt <=0) return nextCommand(startOffset);
+            }
+            offset++;
+        }
+        return null;
     }
 
     private static boolean isCommand (String str){

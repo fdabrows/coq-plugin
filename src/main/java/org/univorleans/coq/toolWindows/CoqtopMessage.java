@@ -19,6 +19,7 @@ package org.univorleans.coq.toolWindows;
 
 import org.univorleans.coq.listeners.MessageTextListener;
 import org.univorleans.coq.listeners.ProofTextListener;
+import org.univorleans.coq.toplevel.CoqtopStack;
 import org.univorleans.coq.toplevel.CoqtopState;
 import org.univorleans.coq.toplevel.CoqtopStackListener;
 
@@ -40,7 +41,9 @@ public class CoqtopMessage implements MessageTextListener, CoqtopStackListener, 
     }
 
     @Override
-    public void coqStateChangee(CoqtopState c) {
+    public void coqStateChangee(CoqtopStack c) {
+        if (messageView!= null)
+        messageView.setInfoText(c.toString());
     }
 
     @Override
