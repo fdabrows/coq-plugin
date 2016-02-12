@@ -16,7 +16,6 @@ import org.univorleans.coq.parser.CoqKeywords;
 %eof{  return;
 %eof}
 
-//CRLF= \n|\r|\r\n
 Uppercase = [A-Z]
 Lowercase = [a-z]
 Letter = {Uppercase} | {Lowercase}
@@ -24,11 +23,11 @@ IDChar = {Letter} | "_" | "'"
 ID = {IDChar} ({IDChar} | {NUMBER})*
 NUMBER = 0 | [1-9][0-9]*
 
-// All separators must be in ANYBUTDOT
-ANYBUTDOT=[^\.\ \t\f\r\n(){}\[\]|,;:]+
-DOCOPEN="(**"
+ANYBUTDOT=[^\.\ \t\f\r\n(){}\[\],;:]+
+
+DOCOPEN="(** "
 COMOPEN="(*"
-COMCLOSE="*)"
+COMCLOSE="*"+")"
 LPAR="("
 RPAR=")"
 WHITE_SPACE=[\ \t\f\r\n]
@@ -49,9 +48,7 @@ ASSIGN=":="
 END_OF_LINE_COMMENT ="#"[^\r\n]*
 FDOT="."[^\ \t\f\r\n]
 
-MINUS="-"
-PLUS="+"
-MULT="*"
+BULLET=("-"+ | "+"+ | "*"+)
 
 %state YYFIXPOINT
 %state YYFIXPOINTNAME
@@ -66,15 +63,8 @@ MULT="*"
 
 %state YYNAME
 
-%state YYTACTIC
 
 %%
-
-{END_OF_LINE_COMMENT} {return CoqTypes.COMMENT;}
-
-
-//{CRLF}              {return HoareTypes.CRLF;}
-
 
 "Definition"                                    {yybegin(YYNAME); return CoqTypes.DEFINITION_KW;}
 "Theorem"                                       {yybegin(YYNAME); return CoqTypes.THEOREM_KW;}
@@ -101,8 +91,17 @@ MULT="*"
 
 "end"                                           {return CoqTypes.END;}
 
-{DOCOPEN}                                       {return CoqTypes.COMOPEN;}
+"Section"                                       {return CoqTypes.SECTIONSTART;}
 
+"Module"                                        {return CoqTypes.MODULESTART;}
+
+"End"                                           {return CoqTypes.SECTIONEND;}
+
+"Hypothesis"                                    {return CoqTypes.HYPOTHESIS_KW;}
+
+"Axiom"                                         {return CoqTypes.AXIOM_KW;}
+
+{DOCOPEN}                                       {return CoqTypes.COMOPEN;}
 
 {COMOPEN}                                       {return CoqTypes.COMOPEN;}
 
@@ -115,12 +114,6 @@ MULT="*"
 {FDOT}                                          {return CoqTypes.FDOT;}
 
 {DOT}                                           {return CoqTypes.DOT;}
-
-{MID}                                           {return CoqTypes.MID;}
-
-{ASSIGN}                                        {return CoqTypes.ASSIGN;}
-
-{ASSIGN}                                        {return CoqTypes.ASSIGN;}
 
 {BIGARROW}                                      {return CoqTypes.BIGARROW;}
 
@@ -135,6 +128,8 @@ MULT="*"
 {RPAR}                                          {return CoqTypes.RPAR;}
 
 {LBRACK}                                        {return CoqTypes.LBRACK;}
+
+{BULLET}                                        {return CoqTypes.BULLET;}
 
 {RBRACK}                                        {return CoqTypes.RBRACK;}
 

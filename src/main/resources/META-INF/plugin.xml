@@ -35,6 +35,7 @@
     <compileServer.plugin classpath="coq-jps-plugin.jar"/>
     <lang.psiStructureViewFactory language="Coq" implementationClass="org.univorleans.coq.structure.CoqStructureViewFactory"/>
     <treeStructureProvider implementation="org.univorleans.coq.structure.CoqTreeStructureProvider"/>
+    <lang.formatter language="Coq" implementationClass="org.univorleans.coq.formatter.CoqFormattingModelBuilder"/>
     <!-- Add your extensions here -->
     <toolWindow id="Coqtop Messages"  anchor="bottom"
                 factoryClass="org.univorleans.coq.toolWindows.CoqtopMessageView"/>

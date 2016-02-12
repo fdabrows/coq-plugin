@@ -69,8 +69,6 @@ public class CoqSyntaxHighlighter extends SyntaxHighlighterBase {
             return KEYWORD_KEYS;
         } else if (tokenType.equals(CoqTypes.COMMAND)) {
             return COMMAND_KEYS;
-        } else if (tokenType.equals(CoqTypes.KEYWORD)) {
-            return FORMULAE_KEYS;
         } else if (tokenType.equals(CoqTypes.TACTIC)) {
             return TACTIC_KEYS;
         } else if (tokenType.equals(CoqTypes.DOT)) {
@@ -79,7 +77,11 @@ public class CoqSyntaxHighlighter extends SyntaxHighlighterBase {
             return KEYWORD_KEYS;
         } else if (tokenType.equals(CoqTypes.LEMMA_KW)) {
             return KEYWORD_KEYS;
-        } else if (tokenType.equals(CoqTypes.REMARK_KW)) {
+        } else if (tokenType.equals(CoqTypes.HYPOTHESIS_KW)) {
+            return KEYWORD_KEYS;
+        } else if (tokenType.equals(CoqTypes.AXIOM_KW)) {
+            return KEYWORD_KEYS;
+        }else if (tokenType.equals(CoqTypes.REMARK_KW)) {
             return KEYWORD_KEYS;
         } else if (tokenType.equals(CoqTypes.FACT_KW)) {
             return KEYWORD_KEYS;
@@ -101,8 +103,20 @@ public class CoqSyntaxHighlighter extends SyntaxHighlighterBase {
             return KEYWORD_KEYS;
         } else if (tokenType.equals(CoqTypes.END)) {
             return KEYWORD_KEYS;
+        } else if (tokenType.equals(CoqTypes.FORALL)) {
+            return KEYWORD_KEYS;
+        } else if (tokenType.equals(CoqTypes.EXISTS)) {
+            return KEYWORD_KEYS;
+        } else  if (tokenType.equals(CoqTypes.SECTIONSTART)) {
+            return FORMULAE_KEYS;
+        } else  if (tokenType.equals(CoqTypes.SECTIONEND)) {
+            return FORMULAE_KEYS;
+        } else  if (tokenType.equals(CoqTypes.MODULESTART)) {
+            return FORMULAE_KEYS;
         } else  if (tokenType.equals(TokenType.BAD_CHARACTER)) {
             return BAD_CHAR_KEYS;
+        } else if (tokenType.equals(CoqTypes.KEYWORD)) {
+            return FORMULAE_KEYS;
         } else {
             return EMPTY_KEYS;
         }

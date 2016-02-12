@@ -37,7 +37,7 @@ public class CoqKeywords {
 
             "Declare", "Delimit", "Derived", "Drop",
 
-            "End", "Eval", "Existential", "Existing", "Export", "Extract", "Extraction",
+            "Eval", "Existential", "Existing", "Export", "Extract", "Extraction",
 
             "Focus", "Functional",
 
@@ -46,7 +46,7 @@ public class CoqKeywords {
             "Hint", "Indentity", "Implicit", "Import", "Include", "Infix", "Inline",
             "Inspect", "Instance",
 
-            "Lemma", "Let", "Load", "Local", "Locate", "Ltac", "Module",
+            "Lemma", "Let", "Load", "Local", "Locate", "Ltac",
             "Next", "Notation",
 
             "Obligation", "Obligations", "Opaque", "Open",
@@ -57,7 +57,7 @@ public class CoqKeywords {
             "Record", "Recursive", "Remove", "Require", "Reserved", "Reset", "Restart", "Restore",
 
             "Save", "Scheme", "State", "Search", "SearchAbout", "SearchPattern", "SearchRewrite",
-            "Section", "Separate", "Set", "Show", "Stategy", "Tactic", "Text", "Time",
+            "Separate", "Set", "Show", "Stategy", "Tactic", "Text", "Time",
             "Transparent", "Undo", "Unfocus", "Unset", "Variable", "Variables", "Whelp", "Write",
             "Equality",
             "Type",
@@ -146,6 +146,8 @@ public class CoqKeywords {
 
     @Nullable
     public static IElementType getIElementType(String str){
+        if (str.equals("forall")) return CoqTypes.FORALL;
+        if (str.equals("exists")) return CoqTypes.EXISTS;
         return table.get(str);
     }
 

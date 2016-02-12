@@ -15,35 +15,25 @@
     psiImplUtilClass="org.univorleans.coq.psi.impl.CoqPsiImplUtil"
 }
 
-coqFile ::= (documentation | commentary | def_general | LBRACK | RBRACK | COMMENT )*
+coqFile ::= phrase*
 
-documentation ::= DOCOPEN (any | DOT)* (commentary (any | DOT)*)? COMCLOSE
+// file
+////////////////////////////////////////////
 
-commentary ::= COMOPEN (any | DOT)* (commentary (any | DOT)*)? COMCLOSE
+private phrase ::=
+| section
+| module
+| commentary
+| documentation
+| def_general
+| proof
 
-anytowith ::=
-| ID | NUMBER
-| KEYWORD | COMMAND | TACTIC
-| MID | COMMA | BIGARROW | ARROW
-| COLON | SEMICOLON
-| LPAR | RPAR | LBRACK | RBRACK
-| LSQBRACK | RSQBRACK
-| ASSIGN
-| FDOT | ANYBUTDOT
+// phrases
+////////////////////////////////////////////
 
-withany ::= anytowith* MATCH withany WITH withany END | anytowith*
+section ::= sectionenter phrase* sectionexit
 
-any ::=
-| ID | NUMBER
-| DEFINITION_KW | PROOF_KW | QED | DEFINED | ADMITTED | FIXPOINT_KW | INDUCTIVE_KW | COFIXPOINT_KW | assertion_keyword
-| KEYWORD | COMMAND | TACTIC
-| MID | COMMA | BIGARROW | ARROW
-| COLON | SEMICOLON
-| LPAR | RPAR | LBRACK | RBRACK
-| LSQBRACK | RSQBRACK
-| ASSIGN
-| MATCH | WITH | END
-| FDOT | ANYBUTDOT
+module ::=  moduleenter phrase* moduleexit
 
 def_general ::=
     | definition
@@ -51,29 +41,105 @@ def_general ::=
     | cofixpoint
     | inductive
     | assertion
-    | PROOF_KW DOT
-    | (QED | DEFINED | ADMITTED) DOT
-    | any+ DOT
+    | formulae+ DOT
 
-definition ::= DEFINITION_KW ID any+ DOT
+proof ::= proofenter proofphrase* proofexit
 
-fixpoint ::= FIXPOINT_KW (fix_body (WITH fix_body)* DOT | any+ DOT)
+commentary ::= COMOPEN (commentany | DOT)* (commentary (commentany | DOT)*)? COMCLOSE
 
-fix_body ::= ID withany
+documentation ::= DOCOPEN (commentany | DOT)* (commentary (commentany | DOT)*)? COMCLOSE
 
-inductive ::= INDUCTIVE_KW (ind_body (WITH ind_body)* DOT | any+ DOT)
+// section
+////////////////////////////////////////////
 
-ind_body ::= ID withany
+sectionenter ::= SECTIONSTART ID (formulae)* DOT
 
-cofixpoint ::= COFIXPOINT_KW any+ DOT
+sectionexit ::= SECTIONEND ID DOT
 
-assertion ::= assertion_keyword ID any+ DOT
+// module
+////////////////////////////////////////////
 
-assertion_keyword ::=
+moduleenter ::= MODULESTART ID (formulae)* DOT
+
+moduleexit ::= SECTIONEND ID DOT
+
+// Definitions
+////////////////////////////////////////////
+
+definition ::= DEFINITION_KW ID formulae* DOT
+
+fixpoint ::= FIXPOINT_KW (ind_body (WITH ind_body)* DOT | formulae+ DOT)
+
+inductive ::= INDUCTIVE_KW (ind_body (WITH ind_body)* DOT | formulae+ DOT)
+
+ind_body ::= ID noWith
+
+cofixpoint ::= COFIXPOINT_KW formulae+ DOT
+
+assertion ::= assertion_keyword ID formulae* DOT
+
+private assertion_keyword ::=
     | THEOREM_KW | LEMMA_KW
     | REMARK_KW | FACT_KW
     | COROLLARY_KW | PROPOSITION_KW
-    | EXAMPLE_KW
+    | EXAMPLE_KW | HYPOTHESIS_KW | AXIOM_KW
+
+// Proofs
+////////////////////////////////////////////
+
+proofenter ::= PROOF_KW DOT
+
+proofexit ::= (QED | DEFINED | ADMITTED) DOT
+
+proofphrase ::= BULLET? (brackets | (formulae* DOT)) | phrase
+
+brackets ::= LBRACK proofphrase* RBRACK
+
+
+// Must not contain END nor DOT
+//anytowith
+
+noWith ::= noMatch* MATCH noWith WITH noWith END | noMatch*
+
+noMatch ::=
+| forallqt | existsqt
+| BULLET | LBRACK noMatch* RBRACK
+| common
+
+// Commentaries
+commentany ::=
+| MATCH | END | WITH | BULLET
+| LBRACK | RBRACK | FORALL | EXISTS
+| common
+
+formulae ::=
+    | forallqt
+    | existsqt
+    | commentary
+    | documentation
+    | MATCH formulae* END
+    | WITH | BULLET
+    | LBRACK formulae* RBRACK
+    | common
+
+forallqt ::= FORALL formulae*
+
+existsqt ::= EXISTS formulae*
+
+common ::=
+| ID | NUMBER
+| DEFINITION_KW | FIXPOINT_KW | INDUCTIVE_KW | COFIXPOINT_KW | assertion_keyword
+| KEYWORD | COMMAND| TACTIC
+| LPAR | RPAR | LSQBRACK | RSQBRACK
+| BIGARROW
+| COMMA | BIGARROW | ARROW | COLON | SEMICOLON
+| BULLET | FDOT | ANYBUTDOT
+
+
+
+
+
+
 
 
 

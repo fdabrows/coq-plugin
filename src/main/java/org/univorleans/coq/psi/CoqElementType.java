@@ -29,7 +29,6 @@ public class CoqElementType extends IElementType {
 
     public CoqElementType(@NotNull @NonNls String debugName) {
         super(debugName, CoqLanguage.INSTANCE);
-
     }
 }
 
