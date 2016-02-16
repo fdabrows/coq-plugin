@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.jetbrains:jgoodies-looks-2.4.2:LATEST-EAP-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/feb219a67709ebbedf82bdb1fe2eb617692418bd/ideaIC-LATEST-EAP-SNAPSHOT/lib/jgoodies-looks-2.4.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/c48f824a75ed727a99beb2cd8dc26a74d1abfcf4/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

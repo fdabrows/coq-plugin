@@ -11,6 +11,9 @@ import org.jetbrains.jps.incremental.CompileContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by dabrowski on 22/01/2016.
@@ -56,5 +59,17 @@ public class CoqBuilderUtil {
         return fileName.endsWith(".v");
     }
 
+    public static File[] getSubdirs(File file) {
+
+        List<File> dirs = new ArrayList<>();
+        if (file.isDirectory()) {
+            dirs.add(file);
+            File[] files = file.listFiles();
+            for (File f : files) {
+                dirs.addAll(Arrays.asList(getSubdirs(f)));
+            }
+        }
+        return dirs.toArray(new File[0]);
+    }
 
 }

@@ -18,42 +18,58 @@ public class CoqProjectDependencies {
 
     @SuppressWarnings("unused") // reflection
     public CoqProjectDependencies() {
+
     }
 
     public CoqProjectDependencies(@NotNull Map<String, List<String>> dependencies) {
         this.dependencies = dependencies;
     }
 
-    private List<Pair<String,String>> getEdges(){
-        List <Pair<String,String>> pairs = new ArrayList<>();
+    private List<Pair<String, String>> getEdges() {
+        List<Pair<String, String>> pairs = new ArrayList<>();
         Set<String> keys = dependencies.keySet();
         Iterator<String> iterator = keys.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             String key = iterator.next();
             List<String> predecessors = dependencies.get(key);
             Iterator<String> iterator2 = predecessors.iterator();
-            while (iterator2.hasNext()){
-                pairs.add(new Pair<String,String>(iterator2.next(), key));
+            while (iterator2.hasNext()) {
+                pairs.add(new Pair<String, String>(iterator2.next(), key));
             }
         }
         return pairs;
     }
 
-    public Set<String> getAllFiles(){
+    public Set<String> getAllFiles() {
         return dependencies.keySet();
     }
 
     @NotNull
-    public List<String> getOrderedFiles(@NotNull Collection<String> files){
-        List <String> myFiles = Arrays.asList(files.toArray(new String[0]));
-        myFiles.sort((f1,f2) -> {
-                    if (f1.equals(f2)) return 0;
-                    for (Pair<String, String> p1 : getEdges()) {
-                        if (p1.getFirst().equals(f1) &&
-                                p1.getSecond().equals(f2)) return 1;
-                    }
-                    return -1;
-                });
+    public List<String> getOrderedFiles(@NotNull Collection<String> files) {
+        List<String> myFiles = Arrays.asList(files.toArray(new String[0]));
+        myFiles.sort((f1, f2) -> {
+            if (f1.equals(f2)) return 0;
+            for (Pair<String, String> p1 : getEdges()) {
+                if (p1.getFirst().equals(f1) &&
+                        p1.getSecond().equals(f2)) return 1;
+            }
+            return -1;
+        });
         return myFiles;
+    }
+
+    public List<String> getDependents(String file) {
+
+        List<String> stack = new ArrayList<>();
+        List<String> result = new ArrayList<>();
+        stack.add(file);
+        while (!stack.isEmpty()) {
+            String f = stack.remove(0);
+            result.add(f);
+            List <String> t = dependencies.get(f);
+            if (t==null) t = new ArrayList<>();
+            stack.addAll(t);
+        }
+        return getOrderedFiles(result);
     }
 }

@@ -13,13 +13,21 @@ public class FilesUtil {
 
     public static List<VirtualFile> getSubdirs(VirtualFile file) {
 
-        VirtualFile[] files = file.getChildren();
         List<VirtualFile> dirs = new ArrayList<>();
 
-        for (VirtualFile f : files) {
-            if (f.isDirectory()) {
-                dirs.add(f);
+        if (file.isDirectory()) {
+            dirs.add(file);
+
+            VirtualFile[] files = file.getChildren();
+
+
+            for (VirtualFile f : files) {
                 dirs.addAll(getSubdirs(f));
+
+//                if (f.isDirectory()) {
+//                    dirs.add(f);
+//                    dirs.addAll(getSubdirs(f));
+//                }
             }
         }
         return dirs;

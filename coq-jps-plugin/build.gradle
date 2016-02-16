@@ -1,7 +1,7 @@
 apply plugin: 'org.jetbrains.intellij'
 intellij {
-    version 'IC-15.0.3' //IntelliJ IDEA dependency
-    plugins 'coverage' //Bundled plugin dependencies
+    version 'LATEST-EAP-SNAPSHOT'
+   // plugins 'coverage' //Bundled plugin coqdep
     pluginName 'coq-plugin'
 }
 jar.archiveName="coq-jps-plugin.jar"

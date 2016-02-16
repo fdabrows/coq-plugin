@@ -1,19 +1,22 @@
-
-Read Bullets as commands
-find first non comment caracter. (first non space caracter with 0 parenthesis)
-
-Test de lecture des commandes.
-
-Indentation
-
-Probleme avec last et first, pas de marquage et saut partiel (utiliser un listener pour le marquage)
-
-Methode speciale pour l'affichage des reponses.
-
-Probleme de gestion des commentaires avec des points
 Ajouter possibilité d'ajouter des includes
 Ajouter repertoire out pour utiliser les vo.
+Projet de test de base, coqtop, dependances et compilation
+Default sdk for new projects
 
-<infomsg> pour les bullets.
+Test plus poussé avant distribution
 
-// Test : coqtop sur un fichier qui n'est pas dans un module/sourceroot
+
+MVC toplevel
+
+Modele
+    CoqtopInterface (CoqtopResponse, CoqtopPrompt)
+    CoqtopStack     (CoqtopStackListener, CoqtopState)
+    CoqDocumentIterator
+
+Vue
+    Editor
+    MessageView
+    ProofView
+
+Controleur
+    CoqtopEngine

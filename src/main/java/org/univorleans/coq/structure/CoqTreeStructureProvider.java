@@ -42,13 +42,13 @@ public class CoqTreeStructureProvider implements TreeStructureProvider{
     @NotNull
     @Override
     public Collection<AbstractTreeNode> modify(@NotNull AbstractTreeNode parent, @NotNull Collection<AbstractTreeNode> children, ViewSettings settings) {
-        ArrayList<AbstractTreeNode> nodes = new ArrayList<>();
+       ArrayList<AbstractTreeNode> nodes = new ArrayList<>();
         for (AbstractTreeNode child : children) {
             if (child instanceof PsiFileNode) {
                 VirtualFile file = ((PsiFileNode) child).getVirtualFile();
-                if (file != null && !file.isDirectory() && !(file.getFileType() instanceof CoqFileType)) {
-                    continue;
-                }
+                //if (file != null && !file.isDirectory() && !(file.getFileType() instanceof CoqFileType)) {
+                //    continue;
+                //}
             }
             nodes.add(child);
         }

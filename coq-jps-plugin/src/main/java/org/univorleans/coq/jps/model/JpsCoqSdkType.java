@@ -15,6 +15,7 @@ public class JpsCoqSdkType extends JpsSdkType<JpsSimpleElement<JpsCoqSdkProperti
 
     public static final String BYTECODE_COMPILER = "coqc";
     public static final String INTERPRETER = "coqtop";
+    public static final String DEPENDENCIES = "coqdep";
 
 
     public static final JpsCoqSdkType INSTANCE = new JpsCoqSdkType();
@@ -30,6 +31,10 @@ public class JpsCoqSdkType extends JpsSdkType<JpsSimpleElement<JpsCoqSdkProperti
 
     public static File getByteCodeInterpreterExecutable(String sdkHome) {
         return getSdkExecutable(sdkHome, INTERPRETER);
+    }
+
+    public static File getDependenciesExecutable(String sdkHome) {
+        return getSdkExecutable(sdkHome, DEPENDENCIES);
     }
 
     @NotNull

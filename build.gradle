@@ -2,16 +2,15 @@ plugins {
     id 'org.jetbrains.intellij' version "0.0.39"
 }
 
-
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
-intellij {
-    version 'IC-15.0.3' //IntelliJ IDEA dependency
-    plugins 'coverage' //Bundled plugin dependencies
-    pluginName 'coq-plugin'
-}
+//intellij {
+    version 'IC-LATEST-EAP-SNAPSHOT'
+    //plugins 'coverage' //Bundled plugin coqdep
+//    pluginName 'coq-plugin'
+//}
 
 sourceSets {
     main {
