@@ -27,6 +27,8 @@ import org.univorleans.coq.util.FilesUtil;
 import org.univorleans.coq.util.ProcessChannels;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -152,15 +154,16 @@ public class Util {
     }
 
     public static File[] getSourceRoots(Module currentModule){
-
-
+// TODO : get output dir
         ModuleRootManager root = ModuleRootManager.getInstance(currentModule);
         VirtualFile[] roots = root.getSourceRoots();
         List<File> include = new ArrayList<>();
         for (VirtualFile vfile : roots){
-            include.add(new File(vfile.getPath()));
-            for (VirtualFile vfile2 : FilesUtil.getSubdirs(vfile))
-                include.add(new File(vfile2.getPath()));
+            for (VirtualFile vfile2 : FilesUtil.getSubdirs(vfile)) {
+                Path p = Paths.get(vfile.getPath()).relativize(Paths.get(vfile2.getPath()));
+                File f = Paths.get(currentModule.getProject().getBasePath()+"/out/"+"production/"+currentModule.getName()).resolve(p).toFile();
+                include.add(f);
+            }
         }
 
         return include.toArray(new File[0]);

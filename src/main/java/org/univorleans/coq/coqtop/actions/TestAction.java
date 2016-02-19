@@ -31,5 +31,5 @@ public class TestAction extends AnAction {
 // -- services
 // -- org
 
-// CoqdependenciesCompileTask
+// CompilerTask
 // CoqModuleBuildOrderBuilder

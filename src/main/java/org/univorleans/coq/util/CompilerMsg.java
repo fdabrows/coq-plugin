@@ -15,13 +15,13 @@ public class CompilerMsg {
 
     public static void error(CompileContext compileContext, String msg) {
 
-        compileContext.addMessage(CompilerMessageCategory.INFORMATION,
+        compileContext.addMessage(CompilerMessageCategory.ERROR,
                 msg, null,-1,-1);
     }
 
     public static void error(CompileContext compileContext, String msg, Exception e) {
 
-        compileContext.addMessage(CompilerMessageCategory.INFORMATION,
+        compileContext.addMessage(CompilerMessageCategory.ERROR,
                 msg, null,-1,-1);
     }
 

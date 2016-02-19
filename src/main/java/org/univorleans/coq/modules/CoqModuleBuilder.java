@@ -130,6 +130,7 @@ public class CoqModuleBuilder extends ModuleBuilder implements SourcePathsBuilde
         }
         else {
             compilerModuleExtension.inheritCompilerOutputPath(true);
+
         }
     }
 

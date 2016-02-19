@@ -15,19 +15,19 @@ public class JpsCoqModulePropertiesSerializer extends JpsModulePropertiesSeriali
 
     public JpsCoqModulePropertiesSerializer() {
         super(JpsCoqModuleType.INSTANCE, "COQ_MODULE", "Coq.ModuleBuildProperties");
-        CoqBuilderUtil.LOG.info("JpsCoqModulePropertiesSerializer");
+        //CoqBuilderUtil.LOG.info("JpsCoqModulePropertiesSerializer");
 
     }
 
     @Override
     public JpsDummyElement loadProperties(Element componentElement) {
-        CoqBuilderUtil.LOG.info("JpsCoqModulePropertiesSerializer.loadPropertis");
+        //CoqBuilderUtil.LOG.info("JpsCoqModulePropertiesSerializer.loadPropertis");
         return new JpsDummyElementImpl();
     }
 
     @Override
     public void saveProperties(JpsDummyElement properties, Element componentElement) {
-        CoqBuilderUtil.LOG.info("JpsCoqModulePropertiesSerializer.saveProperties");
+        //CoqBuilderUtil.LOG.info("JpsCoqModulePropertiesSerializer.saveProperties");
     }
 
 }

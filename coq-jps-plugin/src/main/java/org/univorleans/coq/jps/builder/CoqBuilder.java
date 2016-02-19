@@ -1,24 +1,44 @@
+/*
+ * IntelliJ-coqplugin  / Plugin IntelliJ for Coq
+ * Copyright (c) 2016 F. Dabrowski
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.univorleans.coq.jps.builder;
 
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.VirtualFileSystem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jps.ModuleChunk;
 import org.jetbrains.jps.builders.DirtyFilesHolder;
 import org.jetbrains.jps.builders.FileProcessor;
 import org.jetbrains.jps.builders.java.JavaSourceRootDescriptor;
 import org.jetbrains.jps.incremental.*;
+import org.jetbrains.jps.incremental.fs.CompilationRound;
 import org.jetbrains.jps.incremental.messages.BuildMessage;
 import org.jetbrains.jps.incremental.messages.CompilerMessage;
 import org.jetbrains.jps.model.JpsSimpleElement;
-import org.jetbrains.jps.model.java.JpsJavaExtensionService;
 import org.jetbrains.jps.model.library.sdk.JpsSdk;
 import org.jetbrains.jps.model.module.*;
 import org.univorleans.coq.jps.model.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 
@@ -27,34 +47,35 @@ import java.util.*;
  */
 public class CoqBuilder extends ModuleLevelBuilder {
 
+    //TODO : remove this field
     public static String coqPath = null;
-    public static final Logger LOG = Logger.getInstance(CoqBuilder.class);
 
+    private boolean additional_pass_required = false;
+
+    Set<CompileUnit> toCompile = new HashSet<>();
+
+    Set<File> includes = new HashSet<>();
 
     public CoqBuilder() {
-
         super(BuilderCategory.TRANSLATOR);
     }
 
+    // We assume all dirty files and descendents are within the moduleChunk and
+    // the module chunk contains at most one module
     @Override
     public ExitCode build(CompileContext compileContext, ModuleChunk moduleChunk,
                           DirtyFilesHolder<JavaSourceRootDescriptor, ModuleBuildTarget> dirtyFilesHolder,
                           OutputConsumer outputConsumer) throws ProjectBuildException, IOException {
 
-        JpsModule[] modules = moduleChunk.getModules().toArray(new JpsModule[0]);
-        if (modules.length == 0) return ExitCode.OK;
+        Set<JpsModule> modules = moduleChunk.getModules();
 
-        JpsModuleType moduleType = modules[0].getModuleType();
-        if (!(moduleType instanceof JpsCoqModuleType)) {
-            showError(compileContext, "Not a Coq Module!");
-            return ExitCode.ABORT;
+        if (modules.size() == 0) {
+            showInfo(compileContext, "Targets are up to date.");
+            return ExitCode.NOTHING_DONE;
         }
-
-        JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> sdk =
-                getSdk(modules[0]);
-        if (sdk == null) {
-            showError(compileContext, "No Sdk!");
-            return ExitCode.ABORT;
+        if (modules.size() > 1) {
+            showError(compileContext, "Modules inter-dependencies is not supported yet!");
+            return ExitCode.NOTHING_DONE;
         }
 
         CoqProjectDependencies dependencies =
@@ -63,31 +84,31 @@ public class CoqBuilder extends ModuleLevelBuilder {
                         CoqProjectDependencies.class);
 
         if (dependencies == null) {
-            showError(compileContext, "Can't get dependencies!");
+            showError(compileContext, "Can't read dependencies!");
             return ExitCode.ABORT;
         }
-
-        showInfo(compileContext, "has dirty files : " + String.valueOf(dirtyFilesHolder.hasDirtyFiles()));
 
         FileProcessor<JavaSourceRootDescriptor, ModuleBuildTarget> processor =
                 new FileProcessor<JavaSourceRootDescriptor, ModuleBuildTarget>() {
                     @Override
                     public boolean apply(ModuleBuildTarget target, File file, JavaSourceRootDescriptor root) throws IOException {
 
-                        File baseDir = root.getRootFile();
-                        CoqcWrapper coqc = new CoqcWrapper(sdk, baseDir);
+                        toCompile.add(new CompileUnit(target, file, root));
 
-                        List<String> files = dependencies.getDependents(file.getPath());
-                        String msg = "";
-                        for (String f : files) msg+= f + " ";
-                        showInfo(compileContext, "Order " + msg);
+                        Collection<File> list = CoqBuilderUtil.getSubdirs(root.getRootFile());
+                        for (File f : list) {
+                            Path p = root.getRootFile().toPath().relativize(f.toPath());
+                            includes.add(target.getOutputDir().toPath().resolve(p).toFile());
+                        }
+                        //includes.addAll(CoqBuilderUtil.getSubdirs(root.getRootFile()));
 
-                        for (String source : files) {
-                            File f = new File(source);
-                            showInfo(compileContext, "Build " + f.getPath());
-                            if (!(coqc.compile(f))) {
-                                showError(compileContext, coqc.getErrorMessage());
-                                return false;
+
+                        List<String> deps = dependencies.getDependents(file.getPath());
+
+                        for (String f : deps) {
+                            if (!FSOperations.isMarkedDirty(compileContext, CompilationRound.CURRENT, new File(f))) {
+                                FSOperations.markDirty(compileContext, CompilationRound.NEXT, new File(f));
+                                additional_pass_required = true;
                             }
                         }
                         return true;
@@ -95,115 +116,92 @@ public class CoqBuilder extends ModuleLevelBuilder {
                 };
 
         dirtyFilesHolder.processDirtyFiles(processor);
+
+        if (additional_pass_required) {
+            additional_pass_required = false;
+            return ExitCode.ADDITIONAL_PASS_REQUIRED;
+        }
+
+        if (toCompile.size() == 0) {
+
+            showInfo(compileContext, "Targets are up to date.");
+            return ExitCode.NOTHING_DONE;
+        }
+
+        List<CompileUnit> orderedFiles = dependencies.getOrderedFiles(toCompile);
+
+        // Get coqc command, put in some private method
+        JpsModule module = modules.iterator().next();
+
+        if (!(module.getModuleType() instanceof JpsCoqModuleType)) {
+            showError(compileContext, "Module " + module.getName() + " is not a Coq Module!");
+            return ExitCode.ABORT;
+        }
+
+        JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> sdk = module.getSdk(JpsCoqSdkType.INSTANCE);
+
+        if (sdk == null) {
+            showError(compileContext, "No SDK associated with module " + module.getName() + "!");
+            return ExitCode.ABORT;
+        }
+
+
+        CoqcWrapper coqc = new CoqcWrapper(sdk, includes.toArray(new File[0]));
+
+
+        // Compile dirty files
+        String compiled = "";
+
+        for (CompileUnit source : orderedFiles) {
+
+            File f = source.file;
+            if (!(coqc.compile(f))) {
+
+                //TODO : parse error message
+                ErrorMessage message = coqc.getErrorMessage();
+                compileContext.processMessage(
+                        new CompilerMessage("coqc", BuildMessage.Kind.ERROR, message.message, message.url, -1, -1, -1, message.line, message.column)
+                );
+                return ExitCode.ABORT;
+            }
+
+
+            //showInfo(compileContext, coqc.toString());
+
+            File outvo = new File(source.getOutputName() + ".vo");
+            File outglob = new File(source.getOutputName() + ".glob");
+            File invo = new File(source.getInputName() + ".vo");
+            File inglob = new File(source.getInputName() + ".glob");
+            File outv = new File(source.getOutputName() + ".v");
+
+            if (invo.exists()) {
+                FileUtil.rename(invo, outvo);
+            }
+            if (inglob.exists()) {
+                FileUtil.rename(inglob, outglob);
+            }
+            if (outv.exists()) {
+                FileUtil.delete(outv);
+            }
+            // Remove .v from output
+            // Synchronize structureview
+            showInfo(compileContext, invo.getPath() + "->" + outvo.getPath());
+            outputConsumer.registerOutputFile(moduleChunk.representativeTarget(), outvo, Collections.singleton(source.file.getPath()));
+            outputConsumer.registerOutputFile(moduleChunk.representativeTarget(), outglob, Collections.singleton(source.file.getPath()));
+            compiled += source.target.getOutputDir().toPath().relativize(outvo.toPath()) + " ";
+        }
+        //showInfo(compileContext, compiled);
         return ExitCode.OK;
     }
 
     private void showInfo(CompileContext context, String str) {
         context.processMessage(new CompilerMessage(
-                "Builder", BuildMessage.Kind.INFO, str));
+                "coqc", BuildMessage.Kind.INFO, str));
     }
 
     private void showError(CompileContext context, String str) {
         context.processMessage(new CompilerMessage(
                 "coqc", BuildMessage.Kind.ERROR, str));
-    }
-
-
-    private boolean doBuild(CompileContext compileContext, ModuleChunk moduleChunk, JpsModule module, JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> sdk, OutputConsumer outputConsumer) {
-
-        CoqProjectDependencies dependencies =
-                CoqBuilderUtil.readFromXML(compileContext,
-                        CoqBuilderUtil.BUILD_ORDER_FILE_NAME,
-                        CoqProjectDependencies.class);
-
-        if (dependencies == null) {
-            compileContext.processMessage(new CompilerMessage("Coq", BuildMessage.Kind.ERROR, "No Dep"));
-            return false;
-        }
-
-        // SourceRoots(0)
-        File dir = module.getSourceRoots().get(0).getFile();
-        File[] includes = CoqBuilderUtil.getSubdirs(module.getSourceRoots().get(0).getFile());
-
-        CoqcWrapper coqc = new CoqcWrapper(sdk, dir);
-
-        for (String str : dependencies.getOrderedFiles(dependencies.getAllFiles())) {
-
-            // SourceRoots(0) for relative path
-            File file = new File(str);
-
-            coqc.compile(file);
-
-            try {
-                compileContext.processMessage(new CompilerMessage("Coq file", BuildMessage.Kind.INFO, getBuildOutputDirectory(module, false, compileContext).getPath()));
-            } catch (ProjectBuildException e) {
-                e.printStackTrace();
-            }
-            String name = FileUtil.getNameWithoutExtension(new File(str));
-            File outvo = new File(name + ".vo");
-
-            File outglob = new File(name + ".glob");
-            try {
-                outvo = new File(getBuildOutputDirectory(module, false, compileContext), name + ".vo");
-                outglob = new File(getBuildOutputDirectory(module, false, compileContext), name + ".glob");
-            } catch (ProjectBuildException e) {
-                e.printStackTrace();
-            }
-            compileContext.processMessage(new CompilerMessage("Coq vo file", BuildMessage.Kind.INFO, outvo.getPath()));
-            compileContext.processMessage(new CompilerMessage("Coq glob file", BuildMessage.Kind.INFO, outglob.getPath()));
-            try {
-                outputConsumer.registerOutputFile(moduleChunk.representativeTarget(), outvo, Collections.EMPTY_LIST);
-                outputConsumer.registerOutputFile(moduleChunk.representativeTarget(), outglob, Collections.EMPTY_LIST);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            //try {
-            //File out = new File(getBuildOutputDirectory(module, false, compileContext), name + ".vo");
-            //new File(str+"o").renameTo(out);
-            //outputConsumer.registerOutputFile();
-            //compileContext.processMessage(new CompilerMessage("Coq", BuildMessage.Kind.INFO, out.getPath()));
-
-            //outputConsumer.registerOutputFile(moduleChunk.representativeTarget(), out, Collections.EMPTY_LIST);
-            //} catch (ProjectBuildException e) {
-            //    e.printStackTrace();
-            //} //catch (IOException e) {
-            // e.printStackTrace();
-            //}
-
-        }
-        return true;
-    }
-
-    private JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> getSdk(JpsModule module) {
-        return module.getSdk(JpsCoqSdkType.INSTANCE);
-    }
-
-    @NotNull
-    private static File getBuildOutputDirectory(@NotNull JpsModule module,
-                                                boolean forTests,
-                                                @NotNull CompileContext context) throws ProjectBuildException {
-        JpsJavaExtensionService instance = JpsJavaExtensionService.getInstance();
-        File outputDirectory = instance.getOutputDirectory(module, forTests);
-        if (outputDirectory == null) {
-            String errorMessage = "No output dir for module " + module.getName();
-            context.processMessage(new CompilerMessage("OUTPUT", BuildMessage.Kind.ERROR, errorMessage));
-            throw new ProjectBuildException(errorMessage);
-        }
-        if (!outputDirectory.exists()) {
-            FileUtil.createDirectory(outputDirectory);
-        }
-        return outputDirectory;
-    }
-
-
-    private String getContentRootPath(JpsModule module) {
-        final List<String> urls = module.getContentRootsList().getUrls();
-        if (urls.size() == 0) {
-            throw new RuntimeException("Can't find content root in module");
-        }
-        String url = urls.get(0);
-        return url.substring("file://".length());
     }
 
     @Override

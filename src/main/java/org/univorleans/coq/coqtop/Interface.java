@@ -92,4 +92,11 @@ public class Interface {
         processChannels.input.flush();
         return Util.readResponse(processChannels);
     }
+
+    public String toString(){
+        String msg ="";
+        for (String str : Util.makeCommand(coqtop, include))
+            msg += str + " ";
+        return msg;
+    }
 }

@@ -29,7 +29,7 @@ public class JpsCoqModelSerializerExtension extends JpsModelSerializerExtension 
     @Override
     public List<? extends JpsGlobalExtensionSerializer> getGlobalExtensionSerializers() {
 
-        CoqBuilderUtil.LOG.info("JpsCoqModelSerializerExtension.getGlobalExtensionSerializers");
+        //CoqBuilderUtil.LOG.info("JpsCoqModelSerializerExtension.getGlobalExtensionSerializers");
         return Collections.singletonList(new JpsGlobalConfigurationSerializer());
     }
 
@@ -37,13 +37,13 @@ public class JpsCoqModelSerializerExtension extends JpsModelSerializerExtension 
 
         protected JpsGlobalConfigurationSerializer() {
             super("coq.xml", "CoqConfiguration");
-            CoqBuilderUtil.LOG.info("JpsCoqModelSerializerExtension#JpsGlobalConfigurationSerializer");
+            //CoqBuilderUtil.LOG.info("JpsCoqModelSerializerExtension#JpsGlobalConfigurationSerializer");
 
         }
 
         @Override
         public void loadExtension(@NotNull JpsGlobal global, @NotNull Element componentTag) {
-            CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.loadExtension");
+            //CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.loadExtension");
             for (Element option : JDOMUtil.getChildren(componentTag, "option")) {
                 if ("coqPath".equals(option.getAttributeValue("name"))) {
                     CoqBuilder.coqPath = option.getAttributeValue("value");
@@ -53,21 +53,21 @@ public class JpsCoqModelSerializerExtension extends JpsModelSerializerExtension 
 
         @Override
         public void saveExtension(@NotNull JpsGlobal global, @NotNull Element componentTag) {
-            CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.saveExtension");
+            //CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.saveExtension");
         }
     }
 
         @NotNull
         @Override
         public List<? extends JpsModulePropertiesSerializer<?>> getModulePropertiesSerializers() {
-            CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.getModulePropertiesSerializers");
+            //CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.getModulePropertiesSerializers");
             return Collections.singletonList(new JpsCoqModulePropertiesSerializer());
         }
 
         @NotNull
         @Override
         public List<? extends JpsSdkPropertiesSerializer<?>> getSdkPropertiesSerializers() {
-            CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.getSdkPropertiesSerializers");
+            //CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer.getSdkPropertiesSerializers");
             return Collections.singletonList(new JpsCoqSdkPropertiesSerializer());
         }
 
@@ -78,7 +78,7 @@ public class JpsCoqModelSerializerExtension extends JpsModelSerializerExtension 
 
         public JpsCoqSdkPropertiesSerializer() {
             super(COQ_SDK_TYPE_ID, JpsCoqSdkType.INSTANCE);
-            CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer#JpsCoqSdkPropertiesSerializer");
+            //CoqBuilderUtil.LOG.info("JpsGlobalConfigurationSerializer#JpsCoqSdkPropertiesSerializer");
 
         }
 
@@ -86,7 +86,7 @@ public class JpsCoqModelSerializerExtension extends JpsModelSerializerExtension 
         @Override
         public JpsSimpleElement<JpsCoqSdkProperties> loadProperties(@Nullable Element propertiesElement) {
 
-            CoqBuilderUtil.LOG.info("JpsCoqSdkPropertiesSerializer.loadProperties");
+            //CoqBuilderUtil.LOG.info("JpsCoqSdkPropertiesSerializer.loadProperties");
             String coqPath;
 
             if (propertiesElement != null) {
@@ -95,13 +95,13 @@ public class JpsCoqModelSerializerExtension extends JpsModelSerializerExtension 
             } else {
                 coqPath = null;
             }
-            CoqBuilderUtil.LOG.info("JpsCoqSdkPropertiesSerializer.loadProperties " + coqPath);
+            //CoqBuilderUtil.LOG.info("JpsCoqSdkPropertiesSerializer.loadProperties " + coqPath);
             return JpsElementFactory.getInstance().createSimpleElement(new JpsCoqSdkProperties(coqPath));
         }
 
         @Override
         public void saveProperties(@NotNull JpsSimpleElement<JpsCoqSdkProperties> properties, @NotNull Element element) {
-            CoqBuilderUtil.LOG.info("JpsCoqSdkPropertiesSerializer.saveProperties");
+            //CoqBuilderUtil.LOG.info("JpsCoqSdkPropertiesSerializer.saveProperties");
         }
     }
 

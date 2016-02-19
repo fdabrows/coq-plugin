@@ -1,5 +1,6 @@
-Ajouter possibilité d'ajouter des includes
-Ajouter repertoire out pour utiliser les vo.
+Includes
+delete output files of removed files
+
 Projet de test de base, coqtop, dependances et compilation
 Default sdk for new projects
 
@@ -20,3 +21,9 @@ Vue
 
 Controleur
     CoqtopEngine
+
+Settings
+ShowSettingsUtil.getInstance().showSettingsDialog(project, );
+
+Logger
+coq-plugin/build/idea-sandbox/system/log/idea.log

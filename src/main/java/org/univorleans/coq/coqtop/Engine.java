@@ -17,6 +17,7 @@
 
 package org.univorleans.coq.coqtop;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
@@ -137,8 +138,11 @@ public class Engine implements StackListener {
         //TODO : Dans le cas d'un import, il n'y a pas de modulefile
         File base = new File(editor.getProject().getBasePath());
 
-
         File[] include = Util.getSourceRoots(currentModule);
+//        VirtualFile vf =
+//                editor.getProject().getBaseDir().getName() + File.separator + "production";
+
+        Logger logger = Logger.getInstance(Engine.class);
 
         proofTopLevel = new Interface(coqtop, base, include);
 
@@ -156,7 +160,8 @@ public class Engine implements StackListener {
         this.editor = editor;
 
         //iterator = new CommandReader(editor.getDocument());
-
+        logger.info(proofTopLevel.toString());
+//System.out.println(proofTopLevel.toString());
         addMessageViewListener(Message.INSTANCE);
         addCoqStateListener(Message.INSTANCE);
         addProofViewListener(Message.INSTANCE);
