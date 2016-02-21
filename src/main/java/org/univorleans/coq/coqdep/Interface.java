@@ -17,6 +17,7 @@
 
 package org.univorleans.coq.coqdep;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
 import org.univorleans.coq.jps.builder.CoqProjectDependencies;
@@ -25,22 +26,25 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by dabrowski on 24/01/2016.
  */
-public class Interface {
+public class Interface implements CommandTask<CoqProjectDependencies, TaskError> {
 
+    File coqdep;
     String[] cmd;
     File baseDir;
     String error = "";
+    Project project;
+    CoqProjectDependencies result;
 
+    public Interface(Project project, File coqdep, VirtualFile baseDir, VirtualFile[] includes, VirtualFile[] files) {
 
-    public Interface(File coqdep, VirtualFile baseDir, VirtualFile[] includes, VirtualFile[] files) {
-
+this.project = project;
+        this.coqdep = coqdep;
         this.baseDir = new File(baseDir.getPath());
         List<String> cmd = new ArrayList<>();
 
@@ -48,12 +52,18 @@ public class Interface {
         for (VirtualFile virtualFile : includes) {
             cmd.add("-I");
             cmd.add(virtualFile.getPath());
-//            cmd.add(this.baseDir.toPath().relativize(Paths.get(virtualFile.getPath())).toString());
-
-            //cmd.add(virtualFile.getPath());
         }
+/*
+        Library[] libraries =
+                LibraryTablesRegistrar.getInstance().getLibraryTable().getLibraries();
+        for (Library lib : libraries){
+            for (VirtualFile file : lib.getFiles(OrderRootType.SOURCES)){
+                cmd.add("-I");
+                cmd.add(file.getPath());
+            }
+        }*/
+
         for (VirtualFile file : files) {
-            //cmd.add(this.baseDir.toPath().relativize(Paths.get(file.getPath())).toString());
             cmd.add(file.getPath());
         }
 
@@ -61,7 +71,11 @@ public class Interface {
     }
 
     @Nullable
-    public CoqProjectDependencies execute() {
+    @Override
+    public boolean execute(){
+
+        //if (!coqdep.canExecute()) throw new IOException();
+
         Runtime runtime = Runtime.getRuntime();
         BufferedReader processOutput;
         BufferedReader processError;
@@ -79,7 +93,7 @@ public class Interface {
                 while ((str = processError.readLine()) != null) {
                     error += str + "\n";
                 }
-                return null;
+                return false;
             }
 
             List<String> lines = new ArrayList<>();
@@ -87,14 +101,16 @@ public class Interface {
             while ((str = processOutput.readLine()) != null)
                 lines.add(str);
 
-            CoqProjectDependencies dependencies = Util.extractDependencies(lines);
-            return dependencies;
+            CoqProjectDependencies dependencies = Util.extractDependencies(project, lines);
+            result = dependencies;
+            return true;
+//            return dependencies;
         } catch (IOException e) {
             error = e.getMessage();
-            return null;
+            return false;
         } catch (InterruptedException e) {
             error = e.getMessage();
-            return null;
+            return false;
         }
     }
 
@@ -106,7 +122,13 @@ public class Interface {
         return msg;
     }
 
-    public ErrorMessage getErrorMessage() {
+    @Override
+    public CoqProjectDependencies getValue(){
+        return result;
+    }
+
+    @Override
+    public TaskError getError(){
         return new ErrorMessage(error);
     }
 

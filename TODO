@@ -27,3 +27,18 @@ ShowSettingsUtil.getInstance().showSettingsDialog(project, );
 
 Logger
 coq-plugin/build/idea-sandbox/system/log/idea.log
+
+SDK
+ Sdk projectSdk = ProjectRootManager.getInstance(compileContext.getProject()).getProjectSdk();
+
+
+coqc -R . Lib Lib.v
+coqc -R ../../TestLib Lib Test.v
+
+- Coqlib :
+    coqc -R . Coqlib Mylib.v
+
+- Test :
+    coqc -R ../Coqlib Coqlib Test.v
+    Require Import Coqlib.Test.
+

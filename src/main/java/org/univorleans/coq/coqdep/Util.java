@@ -17,8 +17,14 @@
 
 package org.univorleans.coq.coqdep;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.libraries.Library;
+import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.univorleans.coq.jps.builder.CoqProjectDependencies;
+import org.univorleans.coq.roots.libraries.LibraryProvider;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +37,7 @@ import java.util.regex.Pattern;
  */
 public class Util {
 
-    public static CoqProjectDependencies extractDependencies(@NotNull List<String> coqdepOutput){
+    public static CoqProjectDependencies extractDependencies(Project project , @NotNull List<String> coqdepOutput){
 
         ConcurrentMap<String, List<String>> map = new ConcurrentHashMap<>();
 
@@ -67,6 +73,14 @@ public class Util {
                         }
                     }
                 }
+            }
+        }
+
+        List<Pair<String,String>> list = new ArrayList<>();
+        List<Library> libraries = LibraryProvider.getLibraries(project);
+        for (Library lib : libraries) {
+            for (VirtualFile file : lib.getFiles(OrderRootType.CLASSES)) {
+                list.add(Pair.create(file.getPath(), lib.getName()));
             }
         }
 

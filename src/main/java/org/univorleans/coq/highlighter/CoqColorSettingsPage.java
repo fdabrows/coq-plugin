@@ -1,6 +1,6 @@
 /*
  * IntelliJ-coqplugin  / Plugin IntelliJ for Coq
- * Copyright (c) 2016
+ * Copyright (c) 2016 F. Dabrowski
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.univorleans.coq.config;
+package org.univorleans.coq.highlighter;
 
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
@@ -33,6 +33,7 @@ import java.util.Map;
 public class CoqColorSettingsPage implements ColorSettingsPage {
 
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
+
             new AttributesDescriptor("Commands", CoqSyntaxHighlighter.COMMAND),
             new AttributesDescriptor("CoqKeywords", CoqSyntaxHighlighter.KEYWORD),
             new AttributesDescriptor("Kinds", CoqSyntaxHighlighter.KIND),
@@ -51,6 +52,7 @@ public class CoqColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public SyntaxHighlighter getHighlighter() {
+
         return new CoqSyntaxHighlighter();
     }
 
@@ -78,6 +80,7 @@ public class CoqColorSettingsPage implements ColorSettingsPage {
     @Nullable
     @Override
     public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
+
         return null;
     }
 
@@ -90,6 +93,7 @@ public class CoqColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public ColorDescriptor[] getColorDescriptors() {
+
         return ColorDescriptor.EMPTY_ARRAY;
     }
 

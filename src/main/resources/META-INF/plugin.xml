@@ -31,7 +31,7 @@
         <lang.parserDefinition language="Coq" implementationClass="org.univorleans.coq.parser.CoqParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Coq"
                                        implementationClass="org.univorleans.coq.highlighter.CoqSyntaxHighlighterFactory"/>
-        <colorSettingsPage implementation="org.univorleans.coq.config.CoqColorSettingsPage"/>
+        <colorSettingsPage implementation="org.univorleans.coq.highlighter.CoqColorSettingsPage"/>
         <sdkType id="Coq" implementation="org.univorleans.coq.sdk.CoqSdkType"/>
         <compileServer.plugin classpath="coq-jps-plugin.jar"/>
         <lang.psiStructureViewFactory language="Coq"
@@ -45,31 +45,40 @@
                     factoryClass="org.univorleans.coq.coqtop.ui.CoqtopMessageView"/>
         <toolWindow id="Coq Proof tree" anchor="right"
                     factoryClass="org.univorleans.coq.coqtop.ui.CoqtopProofView"/>
-        <moduleConfigurationEditorProvider implementation="org.univorleans.coq.config.DefaultModuleEditorsProvider" order="first"/>
+        <moduleConfigurationEditorProvider implementation="org.univorleans.coq.roots.ui.configuration.DefaultModuleEditorsProvider"
+                                           order="first"/>
+        <library.type implementation="org.univorleans.coq.roots.libraries.CoqLibrary"/>
+        <library.presentationProvider implementation="org.univorleans.coq.roots.libraries.CoqLibraryPresentationProvider"/>
+        <orderRootType implementation="org.univorleans.coq.roots.libraries.CoqRootType"/>
     </extensions>
 
     <actions>
-        <action id="org.univorleans.coq.files.actions.NewCoqFileAction" class="org.univorleans.coq.files.actions.NewCoqFileAction"
+        <action id="org.univorleans.coq.files.actions.NewCoqFileAction"
+                class="org.univorleans.coq.files.actions.NewCoqFileAction"
                 icon="/icons/coq.png"
                 text="Coq Module" description="Create new Coq module">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
         </action>
-        <action id="org.univorleans.coq.coqtop.actions.TestAction" class="org.univorleans.coq.coqtop.actions.TestAction">
+        <action id="org.univorleans.coq.coqtop.actions.TestAction"
+                class="org.univorleans.coq.coqtop.actions.TestAction">
             <add-to-group group-id="ToolsMenu" relative-to-action="GenerateJavadoc" anchor="after"/>
         </action>
         <!-- Add your actions here -->
         <group id="CoqMenu" text="Coq" description="Coq actions" popup="false">
             <separator/>
 
-            <action id="org.intellij.coq.actions.NextAction" class="org.univorleans.coq.coqtop.actions.NextAction" text="Next"
+            <action id="org.intellij.coq.actions.NextAction" class="org.univorleans.coq.coqtop.actions.NextAction"
+                    text="Next"
                     description="Next Line">
                 <keyboard-shortcut first-keystroke="control alt DOWN" keymap="$default"/>
             </action>
-            <action id="org.intellij.coq.actions.BackAction" class="org.univorleans.coq.coqtop.actions.BackAction" text="Undo"
+            <action id="org.intellij.coq.actions.BackAction" class="org.univorleans.coq.coqtop.actions.BackAction"
+                    text="Undo"
                     description="Last Line">
                 <keyboard-shortcut first-keystroke="control alt UP" keymap="$default"/>
             </action>
-            <action id="org.intellij.coq.actions.UseAction" class="org.univorleans.coq.coqtop.actions.UseAction" text="Use"
+            <action id="org.intellij.coq.actions.UseAction" class="org.univorleans.coq.coqtop.actions.UseAction"
+                    text="Use"
                     description="End of file">
                 <keyboard-shortcut first-keystroke="control alt RIGHT" keymap="$default"/>
             </action>

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Created by dabrowski on 19/02/2016.
  */
-public class ErrorMessage {
+public class ErrorMessage implements TaskError {
 
     public String url;
     public int line;

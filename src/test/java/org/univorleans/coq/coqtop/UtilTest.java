@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 public class UtilTest {
 
-    @Rule
+ /*   @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
     File coqtop, dir1, dir2, dir3;
@@ -36,9 +36,9 @@ public class UtilTest {
     @After
     public void tearDown() throws Exception {
 
-    }
-
-    @Test
+    }*/
+/*
+   @Test
     public void testMakeCommand1() throws Exception {
 
         String[] cmd = Util.makeCommand(coqtop, include);
@@ -50,7 +50,6 @@ public class UtilTest {
 
         assertTrue (cmd.length == expected.length);
         for(int i = 0; i < cmd.length; i++) {
-            System.out.println(cmd[i]);
             assertTrue (cmd[i].equals(expected[i]));
         }
     }
@@ -64,10 +63,9 @@ public class UtilTest {
 
         assertTrue (cmd.length == expected.length);
         for(int i = 0; i < cmd.length; i++) {
-            System.out.println(cmd[i]);
             assertTrue (cmd[i].equals(expected[i]));
         }
     }
-
+*/
 
 }

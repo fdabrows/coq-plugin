@@ -22,6 +22,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.VirtualFileSystem;
+import com.intellij.project.model.JpsLibraryManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jps.ModuleChunk;
 import org.jetbrains.jps.builders.DirtyFilesHolder;
@@ -31,7 +32,9 @@ import org.jetbrains.jps.incremental.*;
 import org.jetbrains.jps.incremental.fs.CompilationRound;
 import org.jetbrains.jps.incremental.messages.BuildMessage;
 import org.jetbrains.jps.incremental.messages.CompilerMessage;
+import org.jetbrains.jps.model.JpsProject;
 import org.jetbrains.jps.model.JpsSimpleElement;
+import org.jetbrains.jps.model.library.JpsLibrary;
 import org.jetbrains.jps.model.library.sdk.JpsSdk;
 import org.jetbrains.jps.model.module.*;
 import org.univorleans.coq.jps.model.*;
@@ -146,7 +149,10 @@ public class CoqBuilder extends ModuleLevelBuilder {
         }
 
 
-        CoqcWrapper coqc = new CoqcWrapper(sdk, includes.toArray(new File[0]));
+        JpsProject project = module.getProject();
+
+        CoqcWrapper coqc = new CoqcWrapper(project, sdk, includes.toArray(new File[0]));
+
 
 
         // Compile dirty files
@@ -165,7 +171,7 @@ public class CoqBuilder extends ModuleLevelBuilder {
                 return ExitCode.ABORT;
             }
 
-
+            CoqBuilderUtil.LOG.info(coqc.toString());
             //showInfo(compileContext, coqc.toString());
 
             File outvo = new File(source.getOutputName() + ".vo");

@@ -17,7 +17,14 @@
 
 package org.univorleans.coq.jps.builder;
 
+import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.libraries.Library;
+import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.vfs.VirtualFile;
+import org.jetbrains.jps.model.JpsProject;
 import org.jetbrains.jps.model.JpsSimpleElement;
+import org.jetbrains.jps.model.library.JpsLibrary;
+import org.jetbrains.jps.model.library.JpsOrderRootType;
 import org.jetbrains.jps.model.library.sdk.JpsSdk;
 import org.univorleans.coq.jps.model.JpsCoqSdkProperties;
 
@@ -31,21 +38,24 @@ import java.util.List;
 /**
  * Created by dabrowski on 25/01/2016.
  */
-public class CoqcWrapper  {
+public class CoqcWrapper {
 
     String[] cmd;
     JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> sdk;
     File[] includes;
     List<String> lines = new ArrayList<>();
+    JpsProject project;
 
-    public CoqcWrapper(JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> projectSdk, File[] includes) {
+    public CoqcWrapper(JpsProject project, JpsSdk<JpsSimpleElement<JpsCoqSdkProperties>> projectSdk, File[] includes) {
 
+        this.project = project;
         this.sdk = projectSdk;
+
         this.includes = includes;
 
     }
 
-    public boolean compile(File path){
+    public boolean compile(File path) {
 
         Runtime runtime = Runtime.getRuntime();
 
@@ -55,7 +65,19 @@ public class CoqcWrapper  {
             List<String> cmd = new ArrayList<>();
             cmd.add(sdk.getHomePath() + "/bin/coqc");
 
-            for (File file : includes) {cmd.add("-I"); cmd.add(file.getPath());}
+            for (File file : includes) {
+                cmd.add("-I");
+                cmd.add(file.getPath());
+            }
+
+            List<JpsLibrary> libraries = project.getLibraryCollection().getLibraries();
+            for (JpsLibrary library : libraries) {
+                for (File file : library.getFiles(JpsOrderRootType.COMPILED)) {
+                    cmd.add("-R");
+                    cmd.add(file.getPath());
+                    cmd.add(library.getName());
+                }
+            }
             cmd.add(path.getPath());
             this.cmd = cmd.toArray(new String[0]);
 
@@ -66,10 +88,10 @@ public class CoqcWrapper  {
                 BufferedReader processError2 = new BufferedReader(new InputStreamReader(coqdep.getInputStream()));
 
                 String str;
-                while ((str = processError.readLine()) != null){
+                while ((str = processError.readLine()) != null) {
                     lines.add(str);
                 }
-                while ((str = processError2.readLine()) != null){
+                while ((str = processError2.readLine()) != null) {
                     lines.add(str);
                 }
                 return false;
@@ -84,14 +106,14 @@ public class CoqcWrapper  {
         }
     }
 
-    public ErrorMessage getErrorMessage(){
+    public ErrorMessage getErrorMessage() {
         return new ErrorMessage(lines);
     }
 
-    public String toString(){
+    public String toString() {
         String msg = "";
-        for (String str : cmd){
-            msg += str+ " ";
+        for (String str : cmd) {
+            msg += str + " ";
         }
         return msg;
     }

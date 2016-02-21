@@ -31,7 +31,10 @@ import java.util.*;
 public class CoqProjectDependencies {
     @Tag("files")
     @AbstractCollection(surroundWithTag = false, elementTag = "file")
+
     public Map<String, List<String>> dependencies;
+
+    //public List<Pair<String, String>> libraries;
 
     @SuppressWarnings("unused") // reflection
     public CoqProjectDependencies() {
@@ -39,10 +42,13 @@ public class CoqProjectDependencies {
     }
 
     public CoqProjectDependencies(@NotNull Map<String, List<String>> dependencies) {
+
         this.dependencies = dependencies;
+        //this.libraries = libraries;
     }
 
     private List<Pair<String, String>> getEdges() {
+
         List<Pair<String, String>> pairs = new ArrayList<>();
         Set<String> keys = dependencies.keySet();
         Iterator<String> iterator = keys.iterator();

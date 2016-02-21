@@ -81,7 +81,6 @@ public class CoqBlock extends AbstractBlock {
 
     @Override
     public Indent getIndent() {
-        //System.out.println(myIndent.toString()+" "+ myNode.toString() +";");
         return myIndent;
         //return Indent.getSpaceIndent(10);
 //        return Indent.getNoneIndent();

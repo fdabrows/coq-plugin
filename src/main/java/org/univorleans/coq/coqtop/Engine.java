@@ -128,7 +128,6 @@ public class Engine implements StackListener {
 
         VirtualFile currentFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
 
-
         Module currentModule = Util.getModule(manager, currentFile);
 
         if (currentModule == null) {
@@ -144,7 +143,7 @@ public class Engine implements StackListener {
 
         Logger logger = Logger.getInstance(Engine.class);
 
-        proofTopLevel = new Interface(coqtop, base, include);
+        proofTopLevel = new Interface(editor.getProject(), coqtop, base, include);
 
         Response response = proofTopLevel.start();
 
@@ -161,7 +160,6 @@ public class Engine implements StackListener {
 
         //iterator = new CommandReader(editor.getDocument());
         logger.info(proofTopLevel.toString());
-//System.out.println(proofTopLevel.toString());
         addMessageViewListener(Message.INSTANCE);
         addCoqStateListener(Message.INSTANCE);
         addProofViewListener(Message.INSTANCE);
@@ -193,7 +191,6 @@ public class Engine implements StackListener {
                 setMessageText(response.message);
                 return false;
             }
-            System.out.println("Proof " + response.message +"/"+response.info);
 
             if (newCoqState.mode() == State.GENERAL) {
                 setMessageText(response.message + "\n\n" + response.info);

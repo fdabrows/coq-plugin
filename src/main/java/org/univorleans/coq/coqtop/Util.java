@@ -19,10 +19,14 @@ package org.univorleans.coq.coqtop;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.univorleans.coq.coqtop.errors.InvalidCoqtopResponse;
+import org.univorleans.coq.roots.libraries.LibraryProvider;
 import org.univorleans.coq.util.FilesUtil;
 import org.univorleans.coq.util.ProcessChannels;
 
@@ -45,14 +49,25 @@ public class Util {
 
     /** all elements of sourceRoots must be non null */
     @NotNull
-    public static String[] makeCommand(@NotNull File coqtop, @NotNull File[] sourceRoots){
+    public static String[] makeCommand(Project project, @NotNull File coqtop, @NotNull File[] sourceRoots){
 
         List<String> cmd = new ArrayList<>();
         cmd.add(coqtop.getPath());
         cmd.add("-emacs");
         for (File file : sourceRoots) {
-            cmd.add("-I"); cmd.add(file.getPath());
+            cmd.add("-I");
+            cmd.add(file.getPath());
         }
+
+        List<Library> libraries = LibraryProvider.getLibraries(project);
+        for (Library lib : libraries) {
+            for (VirtualFile file : lib.getFiles(OrderRootType.CLASSES)) {
+                cmd.add("-R");
+                cmd.add(file.getPath());
+                cmd.add(lib.getName());
+            }
+        }
+
         return cmd.toArray(new String[0]);
     }
 
@@ -119,7 +134,6 @@ public class Util {
 
         List<String> prePrompt = readPrePrompt(processChannels);
         String str = readPrompt(processChannels);
-        System.out.println("ReadResponse " + str);
         Matcher m = p_prompt.matcher(str);
         int globalCounter, proofCounter;
         if (m.matches()) {
@@ -127,10 +141,8 @@ public class Util {
             proofCounter = Integer.valueOf(m.group(5));
         }
         else throw new InvalidCoqtopResponse(str);
-        System.out.println("ReadResponse " + globalCounter + " " + proofCounter);
         List<String> message = Util.readMessage(processChannels);
 
-        System.out.println("ReadResponse " + message.size());
 
         return new Response(prePrompt, globalCounter, proofCounter, message);
     }
@@ -154,7 +166,7 @@ public class Util {
     }
 
     public static File[] getSourceRoots(Module currentModule){
-// TODO : get output dir
+
         ModuleRootManager root = ModuleRootManager.getInstance(currentModule);
         VirtualFile[] roots = root.getSourceRoots();
         List<File> include = new ArrayList<>();

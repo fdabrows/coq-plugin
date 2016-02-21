@@ -19,6 +19,7 @@ package org.univorleans.coq.coqtop;
 
 import java.io.*;
 
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import org.univorleans.coq.coqtop.errors.InvalidCoqtopResponse;
@@ -32,6 +33,7 @@ import org.univorleans.coq.util.ProcessChannels;
 
 public class Interface {
 
+    private Project project;
     private File coqtop;
     private File base;
     private File[] include;
@@ -44,8 +46,9 @@ public class Interface {
      * @param base : executing directory
      * @param include : include directories */
 
-    public Interface(File coqtop, File base, File[] include){
+    public Interface(Project project, File coqtop, File base, File[] include){
 
+        this.project = project;
         this.coqtop = coqtop;
         this.base = base;
         this.include = include;
@@ -61,7 +64,7 @@ public class Interface {
     public Response start() throws IOException, InvalidCoqtopResponse {
 
         if (process != null) throw new IllegalStateException();
-        process = Runtime.getRuntime().exec(Util.makeCommand(coqtop, include), null, base);
+        process = Runtime.getRuntime().exec(Util.makeCommand(project, coqtop, include), null, base);
         processChannels = new ProcessChannels(process);
         return Util.readResponse(processChannels);
     }
@@ -95,7 +98,7 @@ public class Interface {
 
     public String toString(){
         String msg ="";
-        for (String str : Util.makeCommand(coqtop, include))
+        for (String str : Util.makeCommand(project, coqtop, include))
             msg += str + " ";
         return msg;
     }
