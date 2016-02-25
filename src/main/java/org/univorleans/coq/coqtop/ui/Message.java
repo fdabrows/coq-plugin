@@ -39,8 +39,8 @@ public class Message implements MessageTextListener, StackListener, ProofTextLis
 
     @Override
     public void coqStateChangee(Stack c) {
-        if (messageView!= null)
-        messageView.setInfoText(c.toString());
+        //if (messageView!= null)
+        //messageView.setInfoText(c.toString());
     }
 
     @Override

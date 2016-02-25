@@ -86,23 +86,16 @@ public class CoqSdkType extends SdkType{
 
     }
 
-
     @Override
     public String getPresentableName() {
 
         return "Coq SDK";
     }
 
-    public File getBinDirectory(String path) {
-        return new File(path, "bin");
-
-    }
-
     @Nullable
     @Override
     public String getVersionString(@NotNull String sdkHome) {
 
-        String cmd = getBinDirectory(sdkHome).getAbsolutePath() + File.separator + JpsCoqSdkType.BYTECODE_COMPILER;
         return "Unknown";
     }
 

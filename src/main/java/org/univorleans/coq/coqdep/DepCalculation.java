@@ -25,9 +25,9 @@ import com.intellij.openapi.startup.StartupManager;
 /**
  * Created by dabrowski on 22/01/2016.
  */
-public class ProjectComponent extends AbstractProjectComponent {
+public class DepCalculation extends AbstractProjectComponent {
 
-    protected ProjectComponent(Project project) {
+    protected DepCalculation(Project project) {
 
         super(project);
     }
@@ -41,7 +41,7 @@ public class ProjectComponent extends AbstractProjectComponent {
 
         CompilerManager compilerManager = CompilerManager.getInstance(myProject);
         StartupManager startupManager = StartupManager.getInstance(myProject);
-        CompilerTask task = new CompilerTask();
+        DepCalculationTask task = new DepCalculationTask();
         startupManager.registerPostStartupActivity(() -> compilerManager.addBeforeTask(task));
     }
 

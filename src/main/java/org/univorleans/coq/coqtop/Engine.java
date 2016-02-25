@@ -41,6 +41,8 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ui.UIUtil;
 import org.univorleans.coq.coqtop.ui.Message;
+import org.univorleans.coq.util.FilesUtil;
+import org.univorleans.coq.util.Messages;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -69,7 +71,7 @@ public class Engine implements StackListener {
     // We use this stack to get offsets
     private final Stack coqtopStates;
 
-    private Interface proofTopLevel;
+    private CoqtopWrapper proofTopLevel;
 
     // View
     private Editor editor;
@@ -98,16 +100,17 @@ public class Engine implements StackListener {
                 if (showEditorChange() == JOptionPane.CANCEL_OPTION) return null;
                 running.stop();
             }
+
             running = engine;
             return engine;
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            //ioException.printStackTrace();
             return null;
         } catch (CoqtopPathError coqtopPathError) {
-            coqtopPathError.printStackTrace();
+            //coqtopPathError.printStackTrace();
             return null;
         } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
-            invalidCoqtopResponse.printStackTrace();
+            //invalidCoqtopResponse.printStackTrace();
             return null;
         }
     }
@@ -117,7 +120,7 @@ public class Engine implements StackListener {
         Sdk projectSdk = ProjectRootManager.getInstance(editor.getProject()).getProjectSdk();
 
         if (projectSdk == null) {
-            showSdkError();
+            JOptionPane.showMessageDialog(null, Messages.get("nosdk"), "SDK Error", JOptionPane.ERROR_MESSAGE);
             throw new CoqtopPathError();
         }
 
@@ -128,7 +131,7 @@ public class Engine implements StackListener {
 
         VirtualFile currentFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
 
-        Module currentModule = Util.getModule(manager, currentFile);
+        Module currentModule = FilesUtil.getModule(manager, currentFile);
 
         if (currentModule == null) {
             showNoModuleError(currentFile.getName());
@@ -137,13 +140,13 @@ public class Engine implements StackListener {
         //TODO : Dans le cas d'un import, il n'y a pas de modulefile
         File base = new File(editor.getProject().getBasePath());
 
-        File[] include = Util.getSourceRoots(currentModule);
+        File[] include = FilesUtil.getSourceRoots(currentModule);
 //        VirtualFile vf =
 //                editor.getProject().getBaseDir().getName() + File.separator + "production";
 
         Logger logger = Logger.getInstance(Engine.class);
 
-        proofTopLevel = new Interface(editor.getProject(), coqtop, base, include);
+        proofTopLevel = new CoqtopWrapper(editor.getProject(), coqtop, base, include);
 
         Response response = proofTopLevel.start();
 
@@ -217,7 +220,7 @@ public class Engine implements StackListener {
         try {
             if (coqtopStates.hasPreviousStep()) {
                 coqtopStates.stepBack();
-                Response response = proofTopLevel.send(Util.backTo(coqtopStates.top().globalCounter));
+                Response response = proofTopLevel.send(backTo(coqtopStates.top().globalCounter));
                 setMessageText(response.message + "\n\n" + response.info);
             }
         } catch (InvalidCoqtopResponse invalidCoqtopResponse) {
@@ -236,7 +239,7 @@ public class Engine implements StackListener {
 
     public void retract() {
         try {
-            Response response = proofTopLevel.send(Util.backTo(1));
+            Response response = proofTopLevel.send(backTo(1));
 
             coqtopStates.stepBack(response.globalCounter);
 
@@ -254,8 +257,6 @@ public class Engine implements StackListener {
     }
 
 
-    // Le moteur doit travailler a partir de la pile d'etats uniquement.
-    // aussi bien pour avancer que pour reculer.
     public void gotoCursor() {
         try {
             int currentOffset = editor.getCaretModel().getOffset();
@@ -269,11 +270,8 @@ public class Engine implements StackListener {
                 while (coqtopStates.top().offset > currentOffset) {
                     if (coqtopStates.hasPreviousStep()) {
                         coqtopStates.stepBack();
-                        Response response = proofTopLevel.send(Util.backTo(coqtopStates.top().globalCounter));
+                        Response response = proofTopLevel.send(backTo(coqtopStates.top().globalCounter));
 
-/*                        int lastState = coqtopStates.previous().globalCounter;
-                        Response response = proofTopLevel.send(Util.backTo(lastState));
-                        coqtopStates.stepBack(response.prompt.getGlobalCounter());*/
                     } else break;
                 }
             }
@@ -284,6 +282,11 @@ public class Engine implements StackListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @NotNull
+    public static String backTo(int n) throws InvalidCoqtopResponse, IOException {
+        return "BackTo " + n + ".";
     }
 
     public void stop() {
@@ -362,15 +365,6 @@ public class Engine implements StackListener {
 
     private static int showEditorChange() {
         return JOptionPane.showConfirmDialog(null, "Editor change", "Editor change", JOptionPane.OK_CANCEL_OPTION);
-
-    }
-
-    private static void showSdkError() {
-        String error_msg =
-                "Cannot start coqtop: the sdk is not specified.\n" +
-                        "Specifiy the sdk at Project Structure dialog";
-
-        JOptionPane.showMessageDialog(null, error_msg, "SDK Error", JOptionPane.ERROR_MESSAGE);
 
     }
 

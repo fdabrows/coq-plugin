@@ -17,7 +17,7 @@
 
 package org.univorleans.coq.psi;
 
-import org.univorleans.coq.files.CoqFileType;
+import org.univorleans.coq.files.VFileType;
 import org.univorleans.coq.files.CoqLanguage;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
@@ -38,7 +38,7 @@ public class CoqFile extends PsiFileBase {
     @NotNull
     @Override
     public FileType getFileType() {
-        return CoqFileType.INSTANCE;
+        return VFileType.INSTANCE;
     }
 
     @Override

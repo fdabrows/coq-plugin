@@ -1,17 +1,15 @@
 <idea-plugin version="2">
     <id>org.univorleans.coq</id>
-    <name>Plugin display name here</name>
+    <name>coq-plugin</name>
     <version>1.0</version>
     <vendor email="frederic.dabrowski@univ-orleans.fr" url="http://www.univ-orleans.fr/">Université d'Orleans</vendor>
 
     <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+    Coq plugin.<br>
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+    Basic compilation functionality and toplevel interface.<br>
     ]]>
     </change-notes>
 
@@ -36,7 +34,6 @@
         <compileServer.plugin classpath="coq-jps-plugin.jar"/>
         <lang.psiStructureViewFactory language="Coq"
                                       implementationClass="org.univorleans.coq.structure.CoqStructureViewFactory"/>
-        <treeStructureProvider implementation="org.univorleans.coq.structure.CoqTreeStructureProvider"/>
         <lang.formatter language="Coq" implementationClass="org.univorleans.coq.formatter.CoqFormattingModelBuilder"/>
         <!-- <library.type implementation="org.univorleans.coq.util.CoqLibraryType"/>
         <library.presentationProvider implementation="org.univorleans.coq.util.CoqLibraryPresentationProvider"/> -->
@@ -48,13 +45,11 @@
         <moduleConfigurationEditorProvider implementation="org.univorleans.coq.roots.ui.configuration.DefaultModuleEditorsProvider"
                                            order="first"/>
         <library.type implementation="org.univorleans.coq.roots.libraries.CoqLibrary"/>
-        <library.presentationProvider implementation="org.univorleans.coq.roots.libraries.CoqLibraryPresentationProvider"/>
-        <orderRootType implementation="org.univorleans.coq.roots.libraries.CoqRootType"/>
     </extensions>
 
     <actions>
-        <action id="org.univorleans.coq.files.actions.NewCoqFileAction"
-                class="org.univorleans.coq.files.actions.NewCoqFileAction"
+        <action id="org.univorleans.coq.actions.NewCoqFileAction"
+                class="org.univorleans.coq.actions.NewCoqFileAction"
                 icon="/icons/coq.png"
                 text="Coq Module" description="Create new Coq module">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
@@ -105,7 +100,7 @@
 
     <project-components>
         <component>
-            <implementation-class>org.univorleans.coq.coqdep.ProjectComponent</implementation-class>
+            <implementation-class>org.univorleans.coq.coqdep.DepCalculation</implementation-class>
         </component>
     </project-components>
 

@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.jetbrains:httpmime-4.4.1:LATEST-EAP-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/feb219a67709ebbedf82bdb1fe2eb617692418bd/ideaIC-LATEST-EAP-SNAPSHOT/lib/httpmime-4.4.1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/fc2162493280ee2243027b03d99797e182d7694f/ideaIC-LATEST-EAP-SNAPSHOT/lib/httpmime-4.4.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/c48f824a75ed727a99beb2cd8dc26a74d1abfcf4/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/LATEST-EAP-SNAPSHOT/4e56ec853feee6df7e4a860e93bfd79f683f2ac5/ideaIC-LATEST-EAP-SNAPSHOT-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

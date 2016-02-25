@@ -22,9 +22,6 @@ import org.univorleans.coq.coqtop.Engine;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 
-/**
- * Created by dabrowski on 05/01/2016.
- */
 public class StopAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {

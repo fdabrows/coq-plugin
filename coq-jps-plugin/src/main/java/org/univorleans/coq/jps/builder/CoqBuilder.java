@@ -81,10 +81,12 @@ public class CoqBuilder extends ModuleLevelBuilder {
             return ExitCode.NOTHING_DONE;
         }
 
+        File dataStorageRoot = compileContext.getProjectDescriptor().dataManager.getDataPaths().getDataStorageRoot();
         CoqProjectDependencies dependencies =
-                CoqBuilderUtil.readFromXML(compileContext,
-                        CoqBuilderUtil.BUILD_ORDER_FILE_NAME,
-                        CoqProjectDependencies.class);
+                CoqProjectDependencies.read(dataStorageRoot);
+//                CoqBuilderUtil.readFromXML(compileContext,
+//                        CoqBuilderUtil.BUILD_ORDER_FILE_NAME,
+//                        CoqProjectDependencies.class);
 
         if (dependencies == null) {
             showError(compileContext, "Can't read dependencies!");

@@ -17,13 +17,27 @@
 
 package org.univorleans.coq.jps.builder;
 
+import com.intellij.openapi.util.JDOMUtil;
 import com.intellij.openapi.util.Pair;
+import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.xmlb.SkipDefaultValuesSerializationFilters;
+import com.intellij.util.xmlb.XmlSerializer;
 import com.intellij.util.xmlb.annotations.AbstractCollection;
 import com.intellij.util.xmlb.annotations.Tag;
+import org.jdom.Document;
+import org.jdom.JDOMException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.jps.incremental.CompileContext;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by dabrowski on 22/01/2016.
@@ -44,7 +58,47 @@ public class CoqProjectDependencies {
     public CoqProjectDependencies(@NotNull Map<String, List<String>> dependencies) {
 
         this.dependencies = dependencies;
-        //this.libraries = libraries;
+    }
+
+
+    public static CoqProjectDependencies buildDependencies(@NotNull List<String> coqdepOutput){
+        ConcurrentMap<String, List<String>> map = new ConcurrentHashMap<>();
+
+        for (String str2 : coqdepOutput) {
+            String[] parts = str2.split(":");
+            String[] left = parts[0].split(" ");
+            String[] right = parts[1].split(" ");
+            Pattern pattern = Pattern.compile("[^.]*.vo");
+
+            for (String a : left) {
+                Matcher matcher1 = pattern.matcher(a);
+
+                if (matcher1.matches()) {
+                    String path1 = a.substring(0, a.length() - 1);
+                    if (!(map.containsKey(path1)))
+                        map.put(path1, new ArrayList<>());
+                }
+            }
+
+            for (String a : right) {
+                Matcher matcher1 = pattern.matcher(a);
+
+                if (matcher1.matches()) {
+
+                    String path1 = a.substring(0, a.length() - 1);
+                    if (!(map.containsKey(path1)))
+                        map.put(path1, new ArrayList<>());
+                    for (String b : left) {
+                        Matcher matcher2 = pattern.matcher(b);
+                        if (matcher2.matches()) {
+                            String path2 = b.substring(0, b.length() - 1);
+                            map.get(path1).add(path2);
+                        }
+                    }
+                }
+            }
+        }
+        return new CoqProjectDependencies(map);
     }
 
     private List<Pair<String, String>> getEdges() {
@@ -109,5 +163,46 @@ public class CoqProjectDependencies {
             stack.addAll(t);
         }
         return result;
+    }
+
+    public static void write(File file, CoqProjectDependencies dependencies) throws IOException {
+
+
+        org.jdom.Document serializedDocument =
+                new org.jdom.Document(XmlSerializer.serialize(dependencies,
+                        new SkipDefaultValuesSerializationFilters()));
+        JDOMUtil.writeDocument(serializedDocument, file, SystemProperties.getLineSeparator());
+    }
+
+    public static CoqProjectDependencies read(File datastorageRoot){
+        return readFromXML(datastorageRoot,
+                CoqBuilderUtil.BUILD_ORDER_FILE_NAME,
+                CoqProjectDependencies.class);
+    }
+
+    @Nullable
+    public static <T> T readFromXML(@NotNull File datastorageRoot, @NotNull String filename, @NotNull Class<T> tClass) {
+        try {
+            File xmlFile = getXmlFile(datastorageRoot, filename);
+            if (!xmlFile.exists()) return null;
+
+            Document document = JDOMUtil.loadDocument(xmlFile);
+            return XmlSerializer.deserialize(document, tClass);
+        }
+        catch (JDOMException e) {
+            //LOG.error("Can't read XML from " + filename, e);
+        }
+        catch (IOException e) {
+            //LOG.warn("Can't read " + filename, e);
+        }
+        return null;
+    }
+
+    @NotNull
+    public static File getXmlFile(File dataStorageRoot, @NotNull String filename) {
+
+        //File dataStorageRoot = context.getProjectDescriptor().dataManager.getDataPaths().getDataStorageRoot();
+        File parentDirectory = new File(dataStorageRoot, CoqBuilderUtil.BUILDER_DIRECTORY);
+        return new File(parentDirectory, filename);
     }
 }
